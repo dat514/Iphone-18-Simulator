@@ -1,0 +1,47 @@
+/* Liquid Glass material (see js/glass.js). --glass-fill is driven by the iOS 27 "Liquid Glass" slider. */
+[data-glass] {
+    --la: -40deg;
+    --mx: 50%;
+    --my: 0%;
+    --press: 0;
+    --hover: 0;
+    position: relative;
+    background:
+        linear-gradient(155deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.02) 42%, rgba(255, 255, 255, 0.07)),
+        var(--glass-fill, rgba(255, 255, 255, 0.09));
+    -webkit-backdrop-filter: blur(14px) saturate(1.7);
+    backdrop-filter: blur(14px) saturate(1.7);
+    box-shadow:
+        0 calc(8px - var(--press) * 4px) calc(24px - var(--press) * 6px) rgba(0, 0, 0, calc(0.22 - var(--press) * 0.05)),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5),
+        inset 0 -1px 1px rgba(255, 255, 255, 0.14),
+        inset 0 0 calc(14px + var(--press) * 12px) rgba(255, 255, 255, calc(0.05 + var(--press) * 0.1));
+}
+
+[data-glass]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.2px;
+    pointer-events: none;
+    background: conic-gradient(from calc(var(--la) - 180deg),
+            rgba(255, 255, 255, 0.55) 0deg, rgba(255, 255, 255, 0.12) 62deg, rgba(255, 255, 255, 0.12) 118deg,
+            rgba(255, 255, 255, calc(0.85 + var(--hover) * 0.15)) 180deg,
+            rgba(255, 255, 255, 0.12) 242deg, rgba(255, 255, 255, 0.12) 298deg, rgba(255, 255, 255, 0.55) 360deg);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+
+[data-glass]::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(circle at var(--mx) var(--my), rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0.1) 40%, transparent 70%);
+    opacity: calc(var(--hover) * 0.35 + var(--press) * 0.6);
+}
+
+.screen[data-theme="dark"] [data-glass] { --glass-fill: rgba(255, 255, 255, 0.07); }

@@ -1,0 +1,176 @@
+:root {
+    --font: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    --font-r: "SF Pro Rounded", ui-rounded, "SF Pro Display", "Inter", system-ui, sans-serif;
+    --accent: #0a84ff;
+    --green: #30d158;
+    --red: #ff453a;
+    --orange: #ff9f0a;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input,
+textarea,
+[contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    background: #07070b;
+    font-family: var(--font);
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 35%, #1c1b28 0%, #07070b 70%);
+    z-index: -1;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+.glass-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.stage {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+/* ================= device ================= */
+.phone {
+    --s: 1;
+    --frame-a: #3a3a3f;
+    --frame-b: #17171a;
+    --frame-hi: #6b6b72;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+    width: 471px;
+    height: 987px;
+    flex: none;
+    transform: scale(var(--s));
+    border-radius: 77px;
+}
+
+.phone[data-color="silver"] { --frame-a: #e4e4e8; --frame-b: #a9a9b0; --frame-hi: #fff; }
+.phone[data-color="glacier"] { --frame-a: #cfe0ee; --frame-b: #8fa9bf; --frame-hi: #f1f8ff; }
+.phone[data-color="burgundy"] { --frame-a: #7d2c42; --frame-b: #3e0f1d; --frame-hi: #b4566d; }
+
+.frame {
+    position: absolute;
+    inset: 0;
+    border-radius: 77px;
+    background:
+        linear-gradient(135deg, var(--frame-hi), transparent 22%, transparent 78%, var(--frame-hi)) padding-box,
+        linear-gradient(160deg, var(--frame-a), var(--frame-b) 55%, var(--frame-a));
+    box-shadow:
+        0 40px 80px rgba(0, 0, 0, 0.55),
+        0 8px 20px rgba(0, 0, 0, 0.4),
+        inset 0 0 0 1.5px rgba(255, 255, 255, 0.18),
+        inset 0 0 0 4px rgba(0, 0, 0, 0.35),
+        inset 0 0 14px rgba(0, 0, 0, 0.5);
+}
+
+.bezel {
+    position: absolute;
+    inset: 4px;
+    border-radius: 73px;
+    background: #000;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.8);
+}
+
+.screen {
+    position: absolute;
+    left: 15.5px;
+    top: 15.5px;
+    width: 440px;
+    height: 956px;
+    border-radius: 62px;
+    overflow: hidden;
+    background: #000;
+    isolation: isolate;
+    touch-action: none;
+    cursor: default;
+    --fg: #000;
+    --bg: #fff;
+    --bg2: #f2f2f7;
+    --card: #fff;
+    --sep: rgba(60, 60, 67, 0.18);
+    --sub: rgba(60, 60, 67, 0.6);
+    --glass-fill: rgba(255, 255, 255, 0.09);
+}
+
+.screen[data-theme="dark"] {
+    --fg: #fff;
+    --bg: #000;
+    --bg2: #000;
+    --card: #1c1c1e;
+    --sep: rgba(84, 84, 88, 0.5);
+    --sub: rgba(235, 235, 245, 0.6);
+}
+
+/* glass reflection across the display */
+.sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 110;
+    border-radius: inherit;
+    background: linear-gradient(115deg, rgba(255, 255, 255, 0.06) 0%, transparent 28%, transparent 70%, rgba(255, 255, 255, 0.03));
+}
+
+/* hardware buttons */
+.hw {
+    position: absolute;
+    background: linear-gradient(90deg, var(--frame-a), var(--frame-b));
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
+    cursor: pointer;
+    transition: transform 0.12s ease;
+}
+
+.hw:active { filter: brightness(0.8); }
+.hw.l { left: -3.5px; width: 4.5px; border-radius: 3px 0 0 3px; }
+.hw.l:active { transform: translateX(1.5px); }
+.hw.r { right: -3.5px; width: 4.5px; border-radius: 0 3px 3px 0; }
+.hw.r:active { transform: translateX(-1.5px); }
+.hw.action { top: 168px; height: 38px; }
+.hw.volup { top: 238px; height: 64px; }
+.hw.voldown { top: 316px; height: 64px; }
+.hw.power { top: 270px; height: 104px; }
+.hw.camctl { top: 640px; height: 58px; opacity: 0.95; }
+
+.phone.bare { width: 440px; height: 956px; border-radius: 0; }
+.phone.bare .frame,
+.phone.bare .bezel,
+.phone.bare .hw { display: none; }
+.phone.bare .screen { left: 0; top: 0; border-radius: 0; }
