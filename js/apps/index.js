@@ -1,5 +1,6 @@
 import { registerApp, APPS, iconHTML } from "../core/apps.js";
 import { h } from "../core/util.js";
+import { locale } from "../core/i18n.js";
 
 const NAMES = {
     phone: "Phone", messages: "Messages", safari: "Safari", music: "Music", camera: "Camera", photos: "Photos", clock: "Clock", calendar: "Calendar",
@@ -16,7 +17,7 @@ export async function registerAllApps(mods) {
             id, name, placeholder: true, status: "auto",
             get icon() { return iconHTML(id, name); },
             build(root) {
-                root.append(h("div.ph", { html: `<span class="mini big">${iconHTML(id, name)}</span><h2>${name}</h2><p>This app isn’t part of the simulator yet.<br>Swipe up from the bottom edge to go home.</p>` }));
+                root.append(h("div.ph", { html: `<span class="mini big">${iconHTML(id, name)}</span><h2>${name}</h2><p>${locale === "vi" ? "Ứng dụng này chưa có trong simulator.<br>Vuốt lên từ cạnh dưới để về màn hình chính." : "This app isn’t part of the simulator yet.<br>Swipe up from the bottom edge to go home."}</p>` }));
             },
         });
     }

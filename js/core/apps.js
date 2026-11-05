@@ -1,5 +1,6 @@
+import { t, LOC } from "./i18n.js";
 export const APPS = {};
-export const registerApp = (def) => (APPS[def.id] = { status: "dark", bg: "var(--bg)", ...def });
+export const registerApp = (def) => (APPS[def.id] = { status: "dark", bg: "var(--bg)", ...def, name: t(def.name) });
 
 const g = (a, b) => `linear-gradient(180deg, ${a}, ${b})`;
 const svg = (inner) => `<svg viewBox="0 0 64 64" width="100%" height="100%">${inner}</svg>`;
@@ -36,7 +37,7 @@ export const ICONS = {
 export function iconHTML(id, name) {
     if (id === "calendar") {
         const d = new Date();
-        return `<div class="icon cal"><span class="cd">${d.toLocaleDateString("en", { weekday: "short" }).toUpperCase()}</span><b>${d.getDate()}</b></div>`;
+        return `<div class="icon cal"><span class="cd">${d.toLocaleDateString(LOC, { weekday: "short" }).toUpperCase()}</span><b>${d.getDate()}</b></div>`;
     }
     const [bg, art] = ICONS[id] || ICONS.compass;
     return `<div class="icon" style="background:${bg}">${art}</div>`;

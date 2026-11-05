@@ -4,6 +4,7 @@ import { H } from "../core/metrics.js";
 import { clamp, h, sys } from "../core/util.js";
 import { registerGlass } from "../glass.js";
 import { sfx, buzz } from "../core/audio.js";
+import { t } from "../core/i18n.js";
 
 const I = {
     air: `<path d="M21 16v-2l-8-5V3.500a1.500 1.500 0 0 0-3 0V9l-8 5v2l8-2.500V19l-2 1.500V22l3.500-1 3.500 1v-1.500L13 19v-5.500z" fill="currentColor"/>`,
@@ -26,6 +27,11 @@ const I = {
     next: `<path d="M5 6.200v11.600a.8.8 0 0 0 1.250.66l8.200-5.800a.8.8 0 0 0 0-1.320l-8.200-5.800A.8.8 0 0 0 5 6.200zM16.500 5.500h2.300v13h-2.300z" fill="currentColor"/>`,
     prev: `<path d="M19 6.200v11.600a.8.8 0 0 1-1.250.66l-8.200-5.800a.8.8 0 0 1 0-1.320l8.200-5.800A.8.8 0 0 1 19 6.200zM7.500 5.500H5.200v13h2.300z" fill="currentColor"/>`,
 };
+I.drop = `<circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+I.vpn = `<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" stroke="currentColor" stroke-width="2" fill="none"/>`;
+I.link = `<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" fill="none"/>`;
+I.heart = `<path d="M12 20.500C5 16 3 12 3 8.500A4.500 4.500 0 0 1 12 6a4.500 4.500 0 0 1 9 2.500C21 12 19 16 12 20.500z" fill="currentColor"/>`;
+I.note = `<path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="6.500" cy="18" r="2.500" fill="currentColor"/><circle cx="16.500" cy="16" r="2.500" fill="currentColor"/>`;
 const svg = (n, s = 26) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}">${I[n]}</svg>`;
 const G = (cls, extra = "") => `data-glass data-glass-lite data-glass-bezel="26" ${extra} class="${cls}"`;
 
@@ -33,12 +39,16 @@ export function initControl() {
     const el = ctx.el.cc;
     const cb = (key, ico, color) => `<button class="cbtn" data-key="${key}" data-glass data-glass-surface="circle" data-glass-bezel="20" data-glass-thickness="40" data-glass-blur="4" data-press-scale="1.1" style="--on:${color}">${svg(ico, 28)}</button>`;
     const tile = (key, ico, label) => `<button class="tile" data-key="${key}" data-glass data-glass-lite data-glass-bezel="30" data-press-scale="1.08">${svg(ico, 30)}</button>`;
+    const pill = (key, ico, label, color) => `<button class="mod cpill" data-key="${key}" ${G("")} style="--on:${color}"><span class="cpi">${svg(ico, 26)}</span><span class="cpt"><b>${label}</b><em data-sub="${key}"></em></span></button>`;
+    const MUSIC = `<div class="cc-pg"><div class="mod mpage" ${G("")}><div class="m-art big"></div><div class="m-t"><b>${t("Not Playing")}</b><em></em></div><div class="m-c"><button data-m="prev">${svg("prev", 34)}</button><button data-m="toggle" class="pp">${svg("play", 44)}</button><button data-m="next">${svg("next", 34)}</button></div><div class="hs" data-slider="volume" data-orient="h"><i class="vsf"></i></div></div></div>`;
+    const CONN = `<div class="cc-pg"><div class="cpl">${pill("airplane", "air", t("Airplane Mode"), "#ff9f0a")}${pill("wifi", "wifi", t("Wi-Fi"), "#0a84ff")}${pill("cellular", "cell", t("Cellular"), "#30d158")}${pill("bt", "bt", t("Bluetooth"), "#0a84ff")}${pill("airdrop", "drop", t("AirDrop"), "#0a84ff")}${pill("hotspot", "link", t("Personal Hotspot"), "#30d158")}${pill("vpn", "vpn", t("VPN"), "#0a84ff")}</div></div>`;
+    const DOTS = `<div class="cc-dots">${["heart", "note", "drop"].map((k, i) => `<button data-i="${i}">${svg(k, 22)}</button>`).join("")}</div>`;
     el.innerHTML = `
     <div class="cc-bg"></div>
-    <div class="cc-grid">
+    <div class="cc-pgs"><div class="cc-pg"><div class="cc-grid">
         <div class="mod s22 conn" ${G("")}>${cb("airplane", "air", "#ff9f0a")}${cb("cellular", "cell", "#30d158")}${cb("wifi", "wifi", "#0a84ff")}${cb("bt", "bt", "#0a84ff")}</div>
         <div class="mod s22 media" ${G("")}>
-            <div class="m-art"></div><div class="m-t"><b>Not Playing</b><em></em></div>
+            <div class="m-art"></div><div class="m-t"><b>${t("Not Playing")}</b><em></em></div>
             <div class="m-c"><button data-m="prev">${svg("prev", 28)}</button><button data-m="toggle" class="pp">${svg("play", 34)}</button><button data-m="next">${svg("next", 28)}</button></div>
         </div>
         ${tile("rotation", "rot")}${tile("silent", "bell")}
@@ -47,13 +57,13 @@ export function initControl() {
         <button class="mod s21 focus" data-key="focus" ${G("", 'data-press-scale="1.05"')}>${svg("moon", 28)}<b>Focus</b></button>
         ${tile("flash", "flash")}${tile("timer", "timer")}${tile("calc", "calc")}${tile("cam", "cam")}
         ${tile("dark", "half")}${tile("lowpower", "batt")}
-    </div>`;
+    </div></div>${MUSIC}${CONN}</div>${DOTS}`;
     el.querySelectorAll("[data-glass]").forEach(registerGlass);
 
     const g = new Group({ p: 0 }, { response: 0.46, damping: 0.84 }, (v) => {
         const p = clamp(v.p, 0, 1.04);
         const bg = el.querySelector(".cc-bg");
-        const grid = el.querySelector(".cc-grid");
+        const grid = el.querySelector(".cc-pgs");
         bg.style.opacity = clamp(p, 0, 1).toFixed(3);
         grid.style.opacity = clamp(p * 1.4 - 0.1, 0, 1).toFixed(3);
         grid.style.transform = `scale(${(0.55 + 0.45 * p).toFixed(4)})`;
@@ -81,13 +91,19 @@ export function initControl() {
         flash: () => sys.set("flash", !sys.get("flash"), false),
         dark: () => sys.set("theme", sys.get("theme") === "dark" ? "light" : "dark"),
         lowpower: () => sys.set("lowpower", !sys.get("lowpower")),
+        airdrop: () => sys.set("airdrop", !sys.get("airdrop")),
+        hotspot: () => sys.set("hotspot", !sys.get("hotspot")),
+        vpn: () => sys.set("vpn", !sys.get("vpn")),
     };
     const stateOf = {
         airplane: () => sys.get("airplane"), cellular: () => sys.get("cellular") && !sys.get("airplane"), wifi: () => sys.get("wifi"), bt: () => sys.get("bt"),
-        focus: () => sys.get("focus"), rotation: () => sys.get("rotlock"), silent: () => sys.get("silent"), flash: () => sys.get("flash"), dark: () => sys.get("theme") === "dark", lowpower: () => sys.get("lowpower"),
+        focus: () => sys.get("focus"), rotation: () => sys.get("rotlock"), silent: () => sys.get("silent"), flash: () => sys.get("flash"), dark: () => sys.get("theme") === "dark", lowpower: () => sys.get("lowpower"), airdrop: () => sys.get("airdrop"), hotspot: () => sys.get("hotspot"), vpn: () => sys.get("vpn"),
     };
-    const refresh = () => el.querySelectorAll("[data-key]").forEach((b) => b.classList.toggle("on", !!stateOf[b.dataset.key]?.()));
-    ["airplane", "cellular", "wifi", "bt", "focus", "rotlock", "silent", "flash", "theme", "lowpower"].forEach((k) => sys.on(k, refresh));
+    const refresh = () => {
+        el.querySelectorAll("[data-key]").forEach((b) => b.classList.toggle("on", !!stateOf[b.dataset.key]?.()));
+        el.querySelectorAll("[data-sub]").forEach((e) => (e.textContent = stateOf[e.dataset.sub]?.() ? t("On") : t("Off")));
+    };
+    ["airplane", "cellular", "wifi", "bt", "focus", "rotlock", "silent", "flash", "theme", "lowpower", "airdrop", "hotspot", "vpn"].forEach((k) => sys.on(k, refresh));
 
     el.addEventListener("click", (e) => {
         const appTile = e.target.closest(".tile");
@@ -112,7 +128,7 @@ export function initControl() {
             else p?.[m.dataset.m]?.();
             return;
         }
-        if (!e.target.closest(".mod, .tile")) api.close();
+        if (!e.target.closest(".mod, .tile, .cc-dots")) api.close();
     });
     // the tile buttons for apps share [data-key]; stop them toggling state
     ["timer", "calc", "cam"].forEach((k) => delete toggles[k]);
@@ -121,11 +137,13 @@ export function initControl() {
     el.querySelectorAll("[data-slider]").forEach((s) => {
         const key = s.dataset.slider;
         const fill = s.querySelector(".vsf");
-        const draw = (v) => (fill.style.height = `${(v * 100).toFixed(1)}%`);
+        const hz = s.dataset.orient === "h";
+        const draw = (v) => (fill.style[hz ? "width" : "height"] = `${(v * 100).toFixed(1)}%`);
         sys.on(key, draw);
         const set = (e) => {
             const r = s.getBoundingClientRect();
-            const v = clamp(1 - (e.clientY - r.top) / r.height, key === "brightness" ? 0.04 : 0, 1);
+            const raw = hz ? (e.clientX - r.left) / r.width : 1 - (e.clientY - r.top) / r.height;
+            const v = clamp(raw, key === "brightness" ? 0.04 : 0, 1);
             sys.set(key, v, false);
             if (key === "volume") ctx.mod.showVolume?.();
         };
@@ -145,11 +163,46 @@ export function initControl() {
 
     // now playing mirror
     ctx.mod.ccMedia = (m) => {
-        el.querySelector(".m-t b").textContent = m?.title || "Not Playing";
-        el.querySelector(".m-t em").textContent = m?.artist || "";
-        el.querySelector(".m-art").style.background = m?.art || "rgba(255,255,255,.15)";
-        el.querySelector(".pp").innerHTML = svg(m?.playing ? "pause" : "play", 34);
+        el.querySelectorAll(".m-t b").forEach((x) => (x.textContent = m?.title || t("Not Playing")));
+        el.querySelectorAll(".m-t em").forEach((x) => (x.textContent = m?.artist || ""));
+        el.querySelectorAll(".m-art").forEach((x) => (x.style.background = m?.art || "rgba(255,255,255,.15)"));
+        el.querySelectorAll(".pp").forEach((x) => (x.innerHTML = svg(m?.playing ? "pause" : "play", 34)));
     };
+
+    /* ---- 3 trang dọc: Yêu thích / Nhạc / Kết nối (ảnh 15-17) ---- */
+    const pgs = [...el.querySelectorAll(".cc-pg")];
+    const dots = el.querySelector(".cc-dots");
+    const pager = new Group({ p: 0 }, { response: 0.45, damping: 0.86 }, (v) => pgs.forEach((pg, i) => {
+        const d = i - v.p;
+        pg.style.transform = `translate3d(0,${(d * 120).toFixed(1)}px,0)`;
+        pg.style.opacity = clamp(1 - Math.abs(d), 0, 1).toFixed(3);
+        pg.style.pointerEvents = Math.abs(d) < 0.5 ? "auto" : "none";
+    }));
+    pager.snap({ p: 0 });
+    const goPage = (i) => {
+        pager.to({ p: clamp(i, 0, 2) });
+        dots.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === clamp(i, 0, 2)));
+    };
+    goPage(0);
+    dots.addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) goPage(+b.dataset.i); });
+    let drag = null, moved = false;
+    el.addEventListener("pointerdown", (e) => { if (e.target.closest("[data-slider],.cc-dots")) return; drag = { y: ctx.pt(e).y, id: e.pointerId, p0: pager.values.p, on: false, t: performance.now() }; moved = false; });
+    el.addEventListener("pointermove", (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        const dy = ctx.pt(e).y - drag.y;
+        if (!drag.on && Math.abs(dy) > 10) { drag.on = moved = true; try { el.setPointerCapture(e.pointerId); } catch {} }
+        if (drag.on) pager.drive({ p: clamp(drag.p0 - dy / 120, -0.25, 2.25) });
+    });
+    const endDrag = (e) => {
+        if (!drag || e.pointerId !== drag.id) return;
+        const d = drag; drag = null;
+        if (!d.on) return;
+        const v = -(ctx.pt(e).y - d.y) / Math.max(0.05, (performance.now() - d.t) / 1000) / 120;
+        goPage(Math.round(pager.values.p + clamp(v, -6, 6) * 0.1));
+    };
+    el.addEventListener("pointerup", endDrag);
+    el.addEventListener("pointercancel", endDrag);
+    el.addEventListener("click", (e) => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
 
     const api = (ctx.mod.cc = {
         get open() { return isOpen; },
@@ -168,6 +221,7 @@ export function initControl() {
         },
         close(instant) {
             isOpen = false;
+            setTimeout(() => goPage(0), 350);
             if (instant) g.snap({ p: 0 });
             else g.to({ p: 0 }, { params: { response: 0.42, damping: 1 } });
             ctx.mod.wm.syncTone();

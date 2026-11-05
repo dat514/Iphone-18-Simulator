@@ -100,10 +100,10 @@
     const mags = new Float32Array(N);
     let max = 0;
     for (let i = 0; i < N; i++) {
-      const t = i / (N - 1);
-      const a = Math.max(0, t - 2e-3);
-      const b = Math.min(1, t + 2e-3);
-      const height = f(t) * thickness;
+      const t2 = i / (N - 1);
+      const a = Math.max(0, t2 - 2e-3);
+      const b = Math.min(1, t2 + 2e-3);
+      const height = f(t2) * thickness;
       const slope = (f(b) - f(a)) / (b - a) * (thickness / bezel);
       const incidence = Math.atan(slope);
       const refracted = Math.asin(Math.min(1, Math.sin(incidence) / n));
@@ -177,14 +177,14 @@
   }
   function ensureDefs() {
     if (defs) return defs;
-    const svg3 = document.createElementNS(SVG_NS, "svg");
-    svg3.setAttribute("class", "glass-defs");
-    svg3.setAttribute("width", "0");
-    svg3.setAttribute("height", "0");
-    svg3.setAttribute("aria-hidden", "true");
+    const svg4 = document.createElementNS(SVG_NS, "svg");
+    svg4.setAttribute("class", "glass-defs");
+    svg4.setAttribute("width", "0");
+    svg4.setAttribute("height", "0");
+    svg4.setAttribute("aria-hidden", "true");
     defs = document.createElementNS(SVG_NS, "defs");
-    svg3.appendChild(defs);
-    document.body.appendChild(svg3);
+    svg4.appendChild(defs);
+    document.body.appendChild(svg4);
     return defs;
   }
   function buildFilter(state) {
@@ -521,13 +521,13 @@
       uid = 0;
       SURFACES = {
         // Apple-style squircle: soft transition into the flat interior, smooth refraction gradients.
-        squircle: (t) => Math.pow(1 - Math.pow(1 - t, 4), 0.25),
+        squircle: (t2) => Math.pow(1 - Math.pow(1 - t2, 4), 0.25),
         // Plain circular dome: harsher edge, stronger "lens" feel.
-        circle: (t) => Math.sqrt(1 - (1 - t) * (1 - t)),
+        circle: (t2) => Math.sqrt(1 - (1 - t2) * (1 - t2)),
         // Convex outside, concave inside (used by iOS switches).
-        lip: (t) => {
-          const convex = Math.pow(1 - Math.pow(1 - t, 4), 0.25);
-          const s = t * t * t * (t * (t * 6 - 15) + 10);
+        lip: (t2) => {
+          const convex = Math.pow(1 - Math.pow(1 - t2, 4), 0.25);
+          const s = t2 * t2 * t2 * (t2 * (t2 * 6 - 15) + 10);
           return convex * (1 - s) + (1 - convex) * s;
         }
       };
@@ -550,7 +550,7 @@
   function h(sel, props, ...kids) {
     const m = sel.match(/^([a-z0-9]+)?((?:[.#][\w-]+)*)$/i);
     const el = document.createElement(m?.[1] || "div");
-    (m?.[2].match(/[.#][\w-]+/g) || []).forEach((t) => t[0] === "." ? el.classList.add(t.slice(1)) : el.id = t.slice(1));
+    (m?.[2].match(/[.#][\w-]+/g) || []).forEach((t2) => t2[0] === "." ? el.classList.add(t2.slice(1)) : el.id = t2.slice(1));
     if (props && (typeof props !== "object" || props.nodeType || Array.isArray(props))) {
       kids.unshift(props);
       props = null;
@@ -589,9 +589,9 @@
       this.s = [];
     }
     push(x, y) {
-      const t = performance.now();
-      this.s.push({ x, y, t });
-      while (this.s.length > 2 && t - this.s[0].t > 90) this.s.shift();
+      const t2 = performance.now();
+      this.s.push({ x, y, t: t2 });
+      while (this.s.length > 2 && t2 - this.s[0].t > 90) this.s.shift();
     }
     get() {
       const a = this.s[0];
@@ -622,6 +622,9 @@
       if (immediate && k !== "*") f(this.v[k]);
     }
   };
+
+  // js/version.js
+  var VERSION = { simulator: "2.0.0-alpha.9", ios: "27.0", device: "iPhone 18 Pro Max", build: "2026-11-02" };
 
   // js/core/metrics.js
   var W = 440;
@@ -699,14 +702,15 @@
     const fit = () => {
       const vw = innerWidth;
       const vh = innerHeight;
-      const bare = vw < 520;
+      const bare = vw < 520 || matchMedia("(pointer: coarse)").matches && Math.max(vw, vh) < 1100;
+      document.body.classList.toggle("bare", bare);
       ctx.phone.classList.toggle("bare", bare);
       const s = bare ? Math.min(vw / W, vh / H) : Math.min((vw - 24) / 471, (vh - 24) / 987, 1.2);
       ctx.phone.style.setProperty("--s", s.toFixed(4));
     };
     fit();
     addEventListener("resize", fit);
-    sys.on("theme", (t) => ctx.screen.setAttribute("data-theme", t));
+    sys.on("theme", (t2) => ctx.screen.setAttribute("data-theme", t2));
     sys.on("color", (c) => ctx.phone.setAttribute("data-color", c));
     sys.on("brightness", (b) => ctx.el.dim.style.opacity = ((1 - b) * 0.78).toFixed(3));
     sys.on("glass", (g2) => {
@@ -724,10 +728,10 @@
     sb.innerHTML = `<div class="sb-l"><span id="sb-time">9:41</span></div>
         <div class="sb-r"><span id="sb-sig">${SIGNAL}</span><span id="sb-5g">5G</span><span id="sb-wifi">${WIFI}</span>
         <span class="batt"><i class="body"><b id="sb-lvl"></b></i><i class="cap"></i><em id="sb-pct">100</em></span></div>`;
-    const t = sb.querySelector("#sb-time");
+    const t2 = sb.querySelector("#sb-time");
     const tick = () => {
       const d = /* @__PURE__ */ new Date();
-      t.textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false }).replace(/^0/, "");
+      t2.textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false }).replace(/^0/, "");
     };
     tick();
     setInterval(tick, 5e3);
@@ -840,9 +844,105 @@
     bouncy: { response: 0.45, damping: 0.7 }
   };
 
+  // js/core/i18n.js
+  var LOCALES = [["vi", "Ti\u1EBFng Vi\u1EC7t"], ["en", "English"]];
+  var locale = store.get("locale", "vi");
+  var LOC = locale === "vi" ? "vi-VN" : "en-US";
+  document.documentElement.lang = locale;
+  var VI = {
+    "Bluetooth": "Bluetooth",
+    "AirDrop": "AirDrop",
+    "Personal Hotspot": "\u0110i\u1EC3m truy c\u1EADp c\xE1 nh\xE2n",
+    "VPN": "VPN",
+    "On": "B\u1EADt",
+    "Off": "T\u1EAFt",
+    "Not Playing": "Kh\xF4ng ph\xE1t",
+    "Calls": "Cu\u1ED9c g\u1ECDi",
+    "Contacts": "Danh b\u1EA1",
+    "Keypad": "B\xE0n ph\xEDm",
+    "Missed": "Nh\u1EE1",
+    "Outgoing": "G\u1ECDi \u0111i",
+    "Unknown": "Kh\xF4ng r\xF5",
+    "calling\u2026": "\u0111ang g\u1ECDi\u2026",
+    "App Library": "Th\u01B0 vi\u1EC7n \u1EE9ng d\u1EE5ng",
+    "Suggestions": "G\u1EE3i \xFD",
+    "Recently Added": "\u0110\xE3 th\xEAm g\u1EA7n \u0111\xE2y",
+    "Social": "X\xE3 h\u1ED9i",
+    "Entertainment": "Gi\u1EA3i tr\xED",
+    "Utilities": "Ti\u1EC7n \xEDch",
+    "Productivity & Finance": "Hi\u1EC7u su\u1EA5t & T\xE0i ch\xEDnh",
+    "Phone": "\u0110i\u1EC7n tho\u1EA1i",
+    "Messages": "Tin nh\u1EAFn",
+    "Music": "Nh\u1EA1c",
+    "Photos": "\u1EA2nh",
+    "Clock": "\u0110\u1ED3ng h\u1ED3",
+    "Calendar": "L\u1ECBch",
+    "Notes": "Ghi ch\xFA",
+    "Calculator": "M\xE1y t\xEDnh",
+    "Settings": "C\xE0i \u0111\u1EB7t",
+    "Weather": "Th\u1EDDi ti\u1EBFt",
+    "Maps": "B\u1EA3n \u0111\u1ED3",
+    "Wallet": "V\xED",
+    "Health": "S\u1EE9c kh\u1ECFe",
+    "Files": "T\u1EC7p",
+    "Stocks": "Ch\u1EE9ng kho\xE1n",
+    "Translate": "D\u1ECBch thu\u1EADt",
+    "Home": "Nh\xE0",
+    "Reminders": "L\u1EDDi nh\u1EAFc",
+    "Compass": "La b\xE0n",
+    "Airplane Mode": "Ch\u1EBF \u0111\u1ED9 m\xE1y bay",
+    "Wi-Fi": "Wi-Fi",
+    "Cellular": "Di \u0111\u1ED9ng",
+    "Notifications": "Th\xF4ng b\xE1o",
+    "Sounds & Haptics": "\xC2m thanh & C\u1EA3m \u1EE9ng",
+    "Focus": "T\u1EADp trung",
+    "General": "C\xE0i \u0111\u1EB7t chung",
+    "Control Center": "Trung t\xE2m \u0111i\u1EC1u khi\u1EC3n",
+    "Display & Brightness": "M\xE0n h\xECnh & \u0110\u1ED9 s\xE1ng",
+    "Home Screen & App Library": "M\xE0n h\xECnh ch\xEDnh & Th\u01B0 vi\u1EC7n \u1EE9ng d\u1EE5ng",
+    "Wallpaper": "H\xECnh n\u1EC1n",
+    "Device Color": "M\xE0u thi\u1EBFt b\u1ECB",
+    "About": "Gi\u1EDBi thi\u1EC7u",
+    "Software Update": "C\u1EADp nh\u1EADt ph\u1EA7n m\u1EC1m",
+    "Language & Region": "Ng\xF4n ng\u1EEF & V\xF9ng",
+    "Language": "Ng\xF4n ng\u1EEF",
+    "Search": "T\xECm ki\u1EBFm",
+    "Cancel": "H\u1EE7y",
+    "No Results": "Kh\xF4ng c\xF3 k\u1EBFt qu\u1EA3",
+    "Siri Suggestions": "G\u1EE3i \xFD c\u1EE7a Siri",
+    "Applications": "\u1EE8ng d\u1EE5ng",
+    "Swipe up to open": "Vu\u1ED1t l\xEAn \u0111\u1EC3 m\u1EDF",
+    "Done": "Xong",
+    "Edit Home Screen": "S\u1EEDa m\xE0n h\xECnh ch\xEDnh",
+    "Open": "M\u1EDF",
+    "Name": "T\xEAn",
+    "iOS Version": "Phi\xEAn b\u1EA3n iOS",
+    "Simulator Version": "Phi\xEAn b\u1EA3n Simulator",
+    "Model Name": "T\xEAn model",
+    "Appearance": "Giao di\u1EC7n",
+    "Light": "S\xE1ng",
+    "Dark": "T\u1ED1i",
+    "Brightness": "\u0110\u1ED9 s\xE1ng",
+    "Silent Mode": "Ch\u1EBF \u0111\u1ED9 im l\u1EB7ng",
+    "UI Sounds": "\xC2m thanh giao di\u1EC7n",
+    "No events today": "Kh\xF4ng c\xF3 s\u1EF1 ki\u1EC7n h\xF4m nay",
+    "Mostly Cloudy": "Nhi\u1EC1u m\xE2y",
+    "Ho Chi Minh City": "H\u1ED3 Ch\xED Minh",
+    "Liquid Glass": "Liquid Glass",
+    "Clear": "Trong",
+    "Tinted": "Pha m\xE0u"
+  };
+  var t = (s) => locale === "vi" && VI[s] || s;
+  function setLocale(l) {
+    if (l === locale) return;
+    store.set("locale", l);
+    document.body.classList.add("restarting");
+    setTimeout(() => location.reload(), 350);
+  }
+
   // js/core/apps.js
   var APPS = {};
-  var registerApp = (def) => APPS[def.id] = { status: "dark", bg: "var(--bg)", ...def };
+  var registerApp = (def) => APPS[def.id] = { status: "dark", bg: "var(--bg)", ...def, name: t(def.name) };
   var g = (a, b) => `linear-gradient(180deg, ${a}, ${b})`;
   var svg = (inner) => `<svg viewBox="0 0 64 64" width="100%" height="100%">${inner}</svg>`;
   var ICONS = {
@@ -874,7 +974,7 @@
   function iconHTML(id, name) {
     if (id === "calendar") {
       const d = /* @__PURE__ */ new Date();
-      return `<div class="icon cal"><span class="cd">${d.toLocaleDateString("en", { weekday: "short" }).toUpperCase()}</span><b>${d.getDate()}</b></div>`;
+      return `<div class="icon cal"><span class="cd">${d.toLocaleDateString(LOC, { weekday: "short" }).toUpperCase()}</span><b>${d.getDate()}</b></div>`;
     }
     const [bg, art] = ICONS[id] || ICONS.compass;
     return `<div class="icon" style="background:${bg}">${art}</div>`;
@@ -912,23 +1012,36 @@
     const dots = h("div.dots");
     const dockGlass = h("div.dock-glass", { "data-glass": "", "data-glass-static": "", "data-glass-bezel": "34", "data-glass-thickness": "60", "data-glass-refraction": "1.1", "data-glass-blur": "6" });
     const dockRow = h("div.dock-row");
-    const doneBtn = h("button.done", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "14", on: { click: () => setEdit(false) } }, "Done");
+    const doneBtn = h("button.done", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "14", on: { click: () => setEdit(false) } }, t("Done"));
     pages.append(track);
     home.append(wp, pages, dots, dockGlass, dockRow, doneBtn);
     registerGlass(dockGlass);
     registerGlass(doneBtn);
     sys.on("wallpaper", () => wp.style.background = wallpaperCSS(sys.get("wallpaper"), sys.get("customWallpaper")));
     sys.on("customWallpaper", () => wp.style.background = wallpaperCSS(sys.get("wallpaper"), sys.get("customWallpaper")), false);
-    sys.on("theme", (t) => wp.style.filter = t === "dark" ? "brightness(.72)" : "");
+    sys.on("theme", (t2) => wp.style.filter = t2 === "dark" ? "brightness(.72)" : "");
     const icons = {};
     const pageEls = [];
     function makeIcon(id, onDock) {
       const app = APPS[id];
-      const el = h("div.hicon", { "data-app": id, html: `${iconHTML(id, app.name)}<span class="lbl">${app.name}</span>${app.placeholder ? '<button class="del">\u2212</button>' : ""}` });
+      const el = h("div.hicon", { "data-app": id, html: `${iconHTML(id, app.name)}<span class="lbl">${app.name}</span>${app.placeholder || app.installable ? '<button class="del">\u2212</button>' : ""}` });
       el.style.setProperty("--j", (Math.random() * 2).toFixed(2));
       const g2 = new Group({ x: 0, y: 0 }, { response: 0.38, damping: 0.8 }, (v) => el.style.transform = `translate3d(${v.x}px,${v.y}px,0)`);
       icons[id] = { el, g: g2, id, dock: !!onDock };
       return icons[id];
+    }
+    const LIB = [["Suggestions", ["settings", "photos", "camera", "clock"], true], ["Recently Added", ["appstore", "files", "wallet", "health", "tv", "stocks", "translate"]], ["Social", ["messages", "phone", "mail", "safari"]], ["Entertainment", ["music", "podcasts", "tv", "photos", "camera"]], ["Utilities", ["calculator", "compass", "notes", "weather", "clock", "maps"]], ["Productivity & Finance", ["calendar", "reminders", "notes", "mail", "wallet", "stocks", "files"]]];
+    function makeLibrary() {
+      const page2 = h("div.page.lib", { style: { left: layout2.pages.length * W + "px" } });
+      const tile = (id, cls) => h("div.lib-i." + cls, { "data-lib": id, html: iconHTML(id, APPS[id].name) });
+      const folder = ([name, ids, four]) => {
+        const big = ids.slice(0, four ? 4 : 3);
+        const small = four ? [] : ids.slice(3, 7);
+        return h("div.lib-f", [h("div.lib-ic", [...big.map((id) => tile(id, "b")), small.length ? h("div.lib-sm", small.map((id) => tile(id, "s"))) : null]), h("span.lib-n", t(name))]);
+      };
+      page2.append(h("div.lib-s", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "24" }, t("App Library")), h("div.lib-g", LIB.map(folder)));
+      requestAnimationFrame(() => registerGlass(page2.querySelector(".lib-s")));
+      return page2;
     }
     function build() {
       track.innerHTML = "";
@@ -947,6 +1060,8 @@
         });
         dots.append(h("i"));
       });
+      track.append(makeLibrary());
+      dots.append(h("i"));
       layout2.dock.forEach((id) => {
         const ic2 = makeIcon(id, true);
         dockRow.append(ic2.el);
@@ -958,31 +1073,34 @@
       layout2.pages.forEach((ids, p) => ids.forEach((id, i) => place(id, OFFSET[p] + i, snap)));
       layout2.dock.forEach((id, i) => {
         const gap = (DOCK.w - 4 * ICON) / 5;
-        const t = { x: DOCK.x + gap * (i + 1) + ICON * i - (84 - ICON) / 2, y: DOCK.y + (DOCK.h - ICON) / 2 - 2 };
-        icons[id].g[snap ? "snap" : "to"](t);
+        const t2 = { x: DOCK.x + gap * (i + 1) + ICON * i - (84 - ICON) / 2, y: DOCK.y + (DOCK.h - ICON) / 2 - 2 };
+        icons[id].el.style.setProperty("--d", (0.3 + 0.03 * i).toFixed(3));
+        icons[id].g[snap ? "snap" : "to"](t2);
       });
     }
     function place(id, slot, snap) {
       const s = slotXY(slot);
-      const t = { x: s.x - (84 - ICON) / 2, y: s.y };
-      icons[id].g[snap ? "snap" : "to"](t);
+      const t2 = { x: s.x - (84 - ICON) / 2, y: s.y };
+      icons[id].el.style.setProperty("--d", (0.04 * Math.floor(slot / 4) + 0.012 * (slot % 4)).toFixed(3));
+      icons[id].g[snap ? "snap" : "to"](t2);
     }
     function makeWidgets() {
       const d = /* @__PURE__ */ new Date();
       const w = COL_PITCH * 2 - 8;
       const ht = ROW_PITCH * 2 - 40;
       const cal = h("div.widget.cal", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "26", style: { left: GRID_X + 4 + "px", top: GRID_Y + "px", width: w + "px", height: ht + "px" } });
-      cal.innerHTML = `<span class="wd">${d.toLocaleDateString("en", { weekday: "long" })}</span><b class="wn">${d.getDate()}</b><em>${d.toLocaleDateString("en", { month: "long" })}</em><p>No events today</p>`;
+      cal.innerHTML = `<span class="wd">${d.toLocaleDateString(LOC, { weekday: "long" })}</span><b class="wn">${d.getDate()}</b><em>${d.toLocaleDateString(LOC, { month: "long" })}</em><p>${t("No events today")}</p>`;
       const hr = d.getHours();
       const wx = h("div.widget.wx", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "26", style: { left: GRID_X + 4 + COL_PITCH * 2 + "px", top: GRID_Y + "px", width: w + "px", height: ht + "px" } });
-      wx.innerHTML = `<span class="wl">Ho Chi Minh City</span><b class="wt">${hr > 17 || hr < 6 ? 27 : 31}\xB0</b><svg viewBox="0 0 24 24" width="30" height="30"><circle cx="9" cy="10" r="4.2" fill="#ffd60a"/><path d="M9 2.500v1.500M2.500 10H4M4.500 5.500l1 1M13.500 5.500l-1 1" stroke="#ffd60a" stroke-width="1.400" stroke-linecap="round"/><path fill="#fff" d="M10 20a4 4 0 0 1 .8-7.900A5.500 5.500 0 0 1 21 14a3.500 3.500 0 0 1-.5 6z"/></svg><p>Mostly Cloudy</p><em>H:33\xB0  L:26\xB0</em>`;
+      wx.innerHTML = `<span class="wl">${t("Ho Chi Minh City")}</span><b class="wt">${hr > 17 || hr < 6 ? 27 : 31}\xB0</b><svg viewBox="0 0 24 24" width="30" height="30"><circle cx="9" cy="10" r="4.2" fill="#ffd60a"/><path d="M9 2.500v1.500M2.500 10H4M4.500 5.500l1 1M13.500 5.500l-1 1" stroke="#ffd60a" stroke-width="1.400" stroke-linecap="round"/><path fill="#fff" d="M10 20a4 4 0 0 1 .8-7.900A5.500 5.500 0 0 1 21 14a3.500 3.500 0 0 1-.5 6z"/></svg><p>${t("Mostly Cloudy")}</p><em>H:33\xB0  L:26\xB0</em>`;
       requestAnimationFrame(() => [cal, wx].forEach(registerGlass));
       return [cal, wx];
     }
     const pg = new Group({ x: 0 }, { response: 0.5, damping: 0.88 }, (v) => track.style.transform = `translate3d(${-v.x}px,0,0)`);
-    const maxPage = () => layout2.pages.length - 1;
+    const maxPage = () => layout2.pages.length;
     function setDot(p) {
       state.page = p;
+      home.classList.toggle("on-lib", p === layout2.pages.length);
       dots.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i === p));
     }
     function goPage(p, vx) {
@@ -1000,14 +1118,14 @@
       const p = ctx.pt(e);
       if (p.y < 40 || p.y > H - 34) return;
       const icon = e.target.closest(".hicon");
-      down = { x: p.x, y: p.y, icon, axis: null, x0: pg.values.x, id: e.pointerId, del: !!e.target.closest(".del") };
+      down = { x: p.x, y: p.y, icon, axis: null, x0: pg.values.x, id: e.pointerId, del: !!e.target.closest(".del"), lib: e.target.closest("[data-lib]") };
       vel.reset();
       vel.push(p.x, p.y);
       if (icon && !down.del) {
         icon.classList.add("pressed");
         clearTimeout(lp);
         if (!state.editing) lp = setTimeout(() => down && !down.axis && openMenu(icon), 430);
-      } else if (!icon && !state.editing) {
+      } else if (!icon && !state.editing && !down.lib && state.page < layout2.pages.length) {
         clearTimeout(lp);
         lp = setTimeout(() => down && !down.axis && setEdit(true), 650);
       }
@@ -1054,6 +1172,7 @@
       if (drag) return endDrag();
       if (!d.axis) {
         if (menuOpen) return;
+        if (d.lib && !state.editing) return ctx.mod.wm.open(d.lib.dataset.lib, ctx.rect(d.lib));
         if (d.del) return removeIcon(d.icon.dataset.app);
         if (d.icon && !state.editing) ctx.mod.wm.open(d.icon.dataset.app);
         else if (!d.icon && state.editing) return;
@@ -1118,6 +1237,11 @@
         delete icons[id];
         layout2.pages.forEach((ids, p) => ids.forEach((x, i) => place(x, OFFSET[p] + i)));
         store.set("layout", layout2);
+        if (APPS[id].installable) {
+          store.set("installed", store.get("installed", []).filter((x) => x !== id));
+          APPS[id].cloud = true;
+          ctx.mod.appstore?.refresh();
+        }
       }, 220);
     }
     let menuOpen = null;
@@ -1132,8 +1256,8 @@
         h("button", { on: { click: () => {
           closeMenu();
           ctx.mod.wm.open(id);
-        } } }, `Open ${APPS[id].name}`),
-        h("button", { on: { click: () => setEdit(true) } }, "Edit Home Screen")
+        } } }, `${t("Open")} ${APPS[id].name}`),
+        h("button", { on: { click: () => setEdit(true) } }, t("Edit Home Screen"))
       );
       const dim = h("div.cdim", { on: { pointerdown: closeMenu } });
       const clone = h("div.mclone", { html: iconEl.querySelector(".icon").outerHTML, style: { left: r.x + "px", top: r.y + "px" } });
@@ -1153,8 +1277,10 @@
       setTimeout(() => (iconEl.style.visibility = "", menu.remove(), dim.remove(), clone.remove()), 320);
     }
     const factors = () => {
-      const hs = 1 + 0.11 * state.appP + 0.1 * (1 - state.unlockU);
-      const ho = clamp(1 - state.appP * 1.35, 0, 1) * clamp(state.unlockU * 1.2, 0, 1);
+      const hs = 1 + 0.11 * state.appP;
+      const ho = clamp(1 - state.appP * 1.35, 0, 1);
+      home.style.setProperty("--uu", state.unlockU.toFixed(4));
+      home.classList.toggle("unlocking", state.unlockU < 1);
       home.style.setProperty("--hs", hs.toFixed(4));
       home.style.setProperty("--ho", ho.toFixed(3));
     };
@@ -1189,6 +1315,35 @@
         const px = p >= 0 ? p * W - pg.values.x : 0;
         return { x: v.x + (84 - ICON) / 2 + px, y: v.y, w: ICON, h: ICON };
       },
+      addApp(id, o = {}) {
+        if (icons[id]) return;
+        let p = layout2.pages.findIndex((ids, i) => OFFSET[i] + ids.length < 24);
+        if (p < 0) p = layout2.pages.length - 1;
+        layout2.pages[p].push(id);
+        const ic2 = makeIcon(id);
+        ic2.page = p;
+        pageEls[p].append(ic2.el);
+        place(id, OFFSET[p] + layout2.pages[p].length - 1, true);
+        store.set("layout", layout2);
+        if (o.installing) {
+          ic2.el.classList.add("installing");
+          ic2.el.style.setProperty("--p", "0");
+        }
+      },
+      setInstall(id, p, label) {
+        const el = icons[id]?.el;
+        if (!el) return;
+        el.style.setProperty("--p", (p * 100).toFixed(1));
+        el.querySelector(".lbl").textContent = label;
+      },
+      finishInstall(id) {
+        const el = icons[id]?.el;
+        if (!el) return;
+        el.classList.remove("installing");
+        el.classList.add("pop");
+        el.querySelector(".lbl").textContent = APPS[id].name;
+        setTimeout(() => el.classList.remove("pop"), 800);
+      },
       get editing() {
         return state.editing;
       },
@@ -1202,6 +1357,7 @@
     };
     build();
     factors();
+    store.get("installed", []).forEach((id) => APPS[id] && api.addApp(id));
   }
 
   // js/system/wm.js
@@ -1231,14 +1387,14 @@
     apply(v) {
       const s = v.s;
       const l = Math.max(0, (W - v.mw / s) / 2);
-      const t = Math.max(0, (H - v.mh / s) / 2);
+      const t2 = Math.max(0, (H - v.mh / s) / 2);
       const full = Math.abs(s - 1) < 2e-3 && Math.abs(v.mw - W) < 0.5 && Math.abs(v.mh - H) < 0.5 && Math.abs(v.cx - W / 2) < 0.5 && Math.abs(v.cy - H / 2) < 0.5;
       if (full) {
         this.el.style.transform = "";
         this.el.style.clipPath = "";
       } else {
         this.el.style.transform = `translate3d(${(v.cx - W / 2).toFixed(2)}px,${(v.cy - H / 2).toFixed(2)}px,0) scale(${s.toFixed(4)})`;
-        this.el.style.clipPath = `inset(${t.toFixed(2)}px ${l.toFixed(2)}px round ${(v.r / s).toFixed(2)}px)`;
+        this.el.style.clipPath = `inset(${t2.toFixed(2)}px ${l.toFixed(2)}px round ${(v.r / s).toFixed(2)}px)`;
       }
       if (mode !== "switcher" && this === wins.get(current)) setFactors(clamp((s - S0) / (1 - S0), 0, 1));
       onWinApply?.(this, v);
@@ -1274,6 +1430,7 @@
     },
     syncTone,
     open(id, from) {
+      if (APPS[id]?.cloud) return;
       if (mode === "switcher") return;
       const app = APPS[id];
       if (!app) return;
@@ -1330,6 +1487,9 @@
         velocity,
         done: () => {
           w.el.style.display = "none";
+          wins.forEach((x) => {
+            if (x !== w) x.el.style.display = "none";
+          });
           w.el.classList.remove("moving");
           ctx.mod.home.hideIcon(id, false);
           setFactors(0);
@@ -1525,11 +1685,11 @@
       order = order.filter((x) => x !== id);
     }
   };
-  var CS = 0.56;
+  var CS = 0.7;
   var CW = W * CS;
   var CH = H * CS;
-  var GAP = 30;
-  var cardState = (i, scroll) => ({ cx: W / 2 + i * (CW + GAP) + scroll, cy: H / 2 - 12, mw: CW, mh: CH, s: CS, r: 38 });
+  var GAP = -(W * 0.7 * 0.26);
+  var cardState = (i, scroll) => ({ cx: W / 2 + i * (CW + GAP) + scroll, cy: H / 2 - 2, mw: CW, mh: CH, s: CS, r: 46 });
   var sw = { ids: [], scroll: 0, el: null, bg: null, labels: [], active: null };
   function buildLabels() {
     sw.labels.forEach((l) => l.remove());
@@ -1547,7 +1707,7 @@
       const v = w.g.values;
       const l = sw.labels[i];
       if (!l) return;
-      l.style.transform = `translate3d(${v.cx - 90}px, ${v.cy - v.mh / 2 - 34}px, 0)`;
+      l.style.transform = `translate3d(${v.cx - v.mw / 2 + 4}px, ${v.cy - v.mh / 2 - 42}px, 0)`;
       l.style.opacity = mode === "switcher" ? clamp(1 - Math.abs(v.cx - W / 2) / 360 + 0.35, 0, 1).toFixed(2) : 0;
     });
   }
@@ -1669,17 +1829,17 @@
     if (sys.get("silent") || !sys.get("sounds")) return;
     try {
       ac || (ac = new (window.AudioContext || window.webkitAudioContext)());
-      const t = ac.currentTime;
+      const t2 = ac.currentTime;
       const o = ac.createOscillator();
       const g2 = ac.createGain();
       o.type = type;
-      o.frequency.setValueAtTime(freq, t);
-      if (slide) o.frequency.exponentialRampToValueAtTime(freq * slide, t + dur);
-      g2.gain.setValueAtTime(vol * sys.get("volume"), t);
-      g2.gain.exponentialRampToValueAtTime(1e-4, t + dur);
+      o.frequency.setValueAtTime(freq, t2);
+      if (slide) o.frequency.exponentialRampToValueAtTime(freq * slide, t2 + dur);
+      g2.gain.setValueAtTime(vol * sys.get("volume"), t2);
+      g2.gain.exponentialRampToValueAtTime(1e-4, t2 + dur);
       o.connect(g2).connect(ac.destination);
-      o.start(t);
-      o.stop(t + dur + 0.02);
+      o.start(t2);
+      o.stop(t2 + dur + 0.02);
     } catch {
     }
   }
@@ -1707,7 +1867,7 @@
             <div class="lnotifs"></div>
             <button class="lbtn flash" data-glass data-glass-surface="circle" data-glass-bezel="20" data-glass-thickness="40" data-glass-blur="4" data-press-scale="1.12">${FLASH}</button>
             <button class="lbtn cam" data-glass data-glass-surface="circle" data-glass-bezel="20" data-glass-thickness="40" data-glass-blur="4" data-press-scale="1.12">${CAM}</button>
-            <div class="lhint">Swipe up to open</div>
+            <div class="lhint">${t("Swipe up to open")}</div>
         </div>`;
     const lwp = el.querySelector(".lwp");
     const content = el.querySelector(".lock-c");
@@ -1721,7 +1881,7 @@
     const tick = () => {
       const d = /* @__PURE__ */ new Date();
       timeEl.textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false }).replace(/^0/, "");
-      dateEl.textContent = d.toLocaleDateString("en", { weekday: "long", day: "numeric", month: "long" });
+      dateEl.textContent = d.toLocaleDateString(LOC, { weekday: "long", day: "numeric", month: "long" });
     };
     tick();
     setInterval(tick, 1e3);
@@ -1754,15 +1914,15 @@
     const cam = el.querySelector(".cam");
     sys.on("flash", (on) => flash.classList.toggle("on", !!on));
     const hold = (btn2, fn) => {
-      let t = 0;
+      let t2 = 0;
       btn2.addEventListener("pointerdown", () => {
-        clearTimeout(t);
-        t = setTimeout(() => {
+        clearTimeout(t2);
+        t2 = setTimeout(() => {
           buzz(20);
           fn();
         }, 380);
       });
-      const c = () => clearTimeout(t);
+      const c = () => clearTimeout(t2);
       btn2.addEventListener("pointerup", c);
       btn2.addEventListener("pointerleave", c);
     };
@@ -1784,6 +1944,8 @@
       },
       el,
       lock() {
+        ctx.mod.island?.update("lock", { on: 1 });
+        ctx.screen.classList.add("is-locked");
         st.locked = true;
         g2.snap({ u: 0 });
         ctx.mod.home.setUnlock(0);
@@ -1800,6 +1962,8 @@
         content.classList.add("wakein");
       },
       hide(openApp) {
+        ctx.mod.island?.update("lock", null);
+        ctx.screen.classList.remove("is-locked");
         st.locked = false;
         g2.to({ u: 1 }, { params: { response: 0.48, damping: 0.9 } });
         if (!openApp) sfx.unlock();
@@ -1866,12 +2030,12 @@
       list.slice(0, 4).forEach((n, i) => {
         const el = item(n);
         el.style.setProperty("--i", i);
-        el.addEventListener("click", () => open(n));
+        el.addEventListener("click", () => open2(n));
         lockBox.append(el);
         registerGlass(el);
       });
     }
-    function open(n) {
+    function open2(n) {
       if (ctx.mod.lock.shown) ctx.mod.lock.hide(true);
       ctx.mod.wm.open(n.app);
     }
@@ -1889,11 +2053,11 @@
         gone = true;
         g2.to({ y: -140, s: 0.88 }, { params: { response: 0.4, damping: 1 }, done: () => el.remove() });
       };
-      const t = setTimeout(dismiss, 4600);
+      const t2 = setTimeout(dismiss, 4600);
       const vel = new Velocity();
       let sy = null;
       el.addEventListener("pointerdown", (e) => {
-        clearTimeout(t);
+        clearTimeout(t2);
         sy = ctx.pt(e).y;
         vel.reset();
         try {
@@ -1914,7 +2078,7 @@
         sy = null;
         if (Math.abs(moved) < 6) {
           dismiss();
-          open(n);
+          open2(n);
         } else if (moved < -20 || vel.get().y < -300) dismiss();
         else g2.to({ y: 0, s: 1 });
       });
@@ -1962,6 +2126,11 @@
     pause: `<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>`,
     next: `<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M5 6.2v11.6a.8.8 0 0 0 1.25.66l8.2-5.8a.8.8 0 0 0 0-1.32l-8.2-5.8A.8.8 0 0 0 5 6.2zM16.5 5.5h2.3v13h-2.3z"/></svg>`,
     prev: `<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M19 6.2v11.6a.8.8 0 0 1-1.25.66l-8.2-5.8a.8.8 0 0 1 0-1.32l8.2-5.8A.8.8 0 0 1 19 6.2zM7.5 5.5H5.2v13h2.3z"/></svg>`,
+    faceid: `<svg class="fid" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#0a84ff" stroke-width="1.800" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1.500M15 10v1.500M12 10v4h-1M9.500 16.500c1.500 1 3.500 1 5 0"/><path class="sl" d="M5 12h14" stroke="#5ac8fa"/></svg>`,
+    faceok: `<svg class="fid ok" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7.500 12.500l3 3 6-6.500"/></svg>`,
+    faceno: `<svg class="fid no" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#ff453a" stroke-width="1.800" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1.500M15 10v1.500M8.500 16.500c2-1.500 5-1.500 7 0"/></svg>`,
+    lockc: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.200" stroke-linecap="round"><rect x="5" y="11" width="14" height="9.500" rx="2.500" fill="#fff"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`,
+    torch: `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ffd60a"><path d="M8 2h8v4.500l-1.700 3.200V22H9.700V9.700L8 6.500z"/></svg>`,
     bell: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2.2" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>`,
     bellon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>`
   };
@@ -1972,6 +2141,8 @@
         <div class="isl-v" data-v="compact-music"><span class="mini-art"></span>${WAVE}</div>
         <div class="isl-v" data-v="compact-timer">${ICO.timer}<b class="t"></b></div>
         <div class="isl-v" data-v="compact-call">${ICO.call}<b class="t g"></b></div>
+        <div class="isl-v" data-v="compact-lock">${ICO.lockc}</div>
+        <div class="isl-v" data-v="compact-flash">${ICO.torch}<i class="fl-dot"></i></div>
         <div class="isl-v" data-v="alert"><span class="ai"></span><span class="at"></span></div>
         <div class="isl-v x" data-v="x-music">
             <div class="xm-top"><span class="art"></span><span class="meta"><b class="xm-title"></b><em class="xm-artist"></em></span>${WAVE}</div>
@@ -1992,7 +2163,7 @@
     let alertTimer = 0;
     let collapseTimer = 0;
     let alertShown = null;
-    const order2 = ["call", "timer", "music"];
+    const order2 = ["call", "timer", "music", "flash", "lock"];
     const top = () => order2.find((k) => act[k]);
     const fmt = (s) => {
       s = Math.max(0, Math.round(s));
@@ -2025,13 +2196,13 @@
       }
       ticker();
     }
-    let tk = 0;
+    let tk2 = 0;
     function ticker() {
       const need = act.timer || act.call || expanded === "music" && act.music;
-      if (need && !tk) tk = setInterval(updateTimes, 250);
-      if (!need && tk) {
-        clearInterval(tk);
-        tk = 0;
+      if (need && !tk2) tk2 = setInterval(updateTimes, 250);
+      if (!need && tk2) {
+        clearInterval(tk2);
+        tk2 = 0;
       }
       updateTimes();
     }
@@ -2076,6 +2247,16 @@
         expanded = null;
         render2();
       },
+      faceID(ok = true) {
+        const vi = locale === "vi";
+        return new Promise((res) => {
+          api.alert("<b>Face ID</b>", "faceid", 6e3);
+          setTimeout(() => {
+            api.alert(`<b>${ok ? vi ? "\u0110\xE3 x\xE1c nh\u1EADn" : "Done" : vi ? "Kh\xF4ng nh\u1EADn di\u1EC7n \u0111\u01B0\u1EE3c" : "Face ID Failed"}</b>`, ok ? "faceok" : "faceno", 1600);
+            setTimeout(() => res(ok), ok ? 900 : 1700);
+          }, 1300);
+        });
+      },
       alert(html, icon, ms = 2200) {
         alertShown = true;
         el.querySelector(".ai").innerHTML = ICO[icon] || "";
@@ -2101,12 +2282,20 @@
         return;
       }
       if (expanded) api.collapse();
+      else if (top() === "flash") sys.set("flash", false, false);
       else if (top()) api.expand();
     });
     ctx.screen.addEventListener("pointerdown", (e) => {
       if (expanded && !e.target.closest("#island")) api.collapse();
     }, true);
     ctx.mod.ICO = ICO;
+    requestAnimationFrame(() => {
+      if (ctx.mod.lock?.locked !== false) {
+        api.update("lock", { on: 1 });
+        ctx.screen.classList.add("is-locked");
+      }
+    });
+    sys.on("flash", (on) => api.update("flash", on ? { on: 1 } : null));
     render2();
   }
 
@@ -2133,18 +2322,27 @@
     next: `<path d="M5 6.200v11.600a.8.8 0 0 0 1.250.66l8.200-5.800a.8.8 0 0 0 0-1.320l-8.200-5.800A.8.8 0 0 0 5 6.200zM16.500 5.500h2.300v13h-2.300z" fill="currentColor"/>`,
     prev: `<path d="M19 6.200v11.600a.8.8 0 0 1-1.250.66l-8.200-5.800a.8.8 0 0 1 0-1.320l8.200-5.800A.8.8 0 0 1 19 6.200zM7.500 5.500H5.200v13h2.300z" fill="currentColor"/>`
   };
+  I.drop = `<circle cx="12" cy="12" r="2.4" fill="currentColor"/><path d="M7.5 7.5a6.4 6.4 0 0 0 0 9M16.5 7.5a6.4 6.4 0 0 1 0 9M4.5 4.5a10.6 10.6 0 0 0 0 15M19.5 4.5a10.6 10.6 0 0 1 0 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>`;
+  I.vpn = `<circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" fill="none"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18" stroke="currentColor" stroke-width="2" fill="none"/>`;
+  I.link = `<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" fill="none"/>`;
+  I.heart = `<path d="M12 20.500C5 16 3 12 3 8.500A4.500 4.500 0 0 1 12 6a4.500 4.500 0 0 1 9 2.500C21 12 19 16 12 20.500z" fill="currentColor"/>`;
+  I.note = `<path d="M9 18V6l10-2v12" stroke="currentColor" stroke-width="2.200" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="6.500" cy="18" r="2.500" fill="currentColor"/><circle cx="16.500" cy="16" r="2.500" fill="currentColor"/>`;
   var svg2 = (n, s = 26) => `<svg viewBox="0 0 24 24" width="${s}" height="${s}">${I[n]}</svg>`;
   var G = (cls, extra = "") => `data-glass data-glass-lite data-glass-bezel="26" ${extra} class="${cls}"`;
   function initControl() {
     const el = ctx.el.cc;
     const cb = (key, ico, color) => `<button class="cbtn" data-key="${key}" data-glass data-glass-surface="circle" data-glass-bezel="20" data-glass-thickness="40" data-glass-blur="4" data-press-scale="1.1" style="--on:${color}">${svg2(ico, 28)}</button>`;
     const tile = (key, ico, label) => `<button class="tile" data-key="${key}" data-glass data-glass-lite data-glass-bezel="30" data-press-scale="1.08">${svg2(ico, 30)}</button>`;
+    const pill = (key, ico, label, color) => `<button class="mod cpill" data-key="${key}" ${G("")} style="--on:${color}"><span class="cpi">${svg2(ico, 26)}</span><span class="cpt"><b>${label}</b><em data-sub="${key}"></em></span></button>`;
+    const MUSIC = `<div class="cc-pg"><div class="mod mpage" ${G("")}><div class="m-art big"></div><div class="m-t"><b>${t("Not Playing")}</b><em></em></div><div class="m-c"><button data-m="prev">${svg2("prev", 34)}</button><button data-m="toggle" class="pp">${svg2("play", 44)}</button><button data-m="next">${svg2("next", 34)}</button></div><div class="hs" data-slider="volume" data-orient="h"><i class="vsf"></i></div></div></div>`;
+    const CONN = `<div class="cc-pg"><div class="cpl">${pill("airplane", "air", t("Airplane Mode"), "#ff9f0a")}${pill("wifi", "wifi", t("Wi-Fi"), "#0a84ff")}${pill("cellular", "cell", t("Cellular"), "#30d158")}${pill("bt", "bt", t("Bluetooth"), "#0a84ff")}${pill("airdrop", "drop", t("AirDrop"), "#0a84ff")}${pill("hotspot", "link", t("Personal Hotspot"), "#30d158")}${pill("vpn", "vpn", t("VPN"), "#0a84ff")}</div></div>`;
+    const DOTS = `<div class="cc-dots">${["heart", "note", "drop"].map((k, i) => `<button data-i="${i}">${svg2(k, 22)}</button>`).join("")}</div>`;
     el.innerHTML = `
     <div class="cc-bg"></div>
-    <div class="cc-grid">
+    <div class="cc-pgs"><div class="cc-pg"><div class="cc-grid">
         <div class="mod s22 conn" ${G("")}>${cb("airplane", "air", "#ff9f0a")}${cb("cellular", "cell", "#30d158")}${cb("wifi", "wifi", "#0a84ff")}${cb("bt", "bt", "#0a84ff")}</div>
         <div class="mod s22 media" ${G("")}>
-            <div class="m-art"></div><div class="m-t"><b>Not Playing</b><em></em></div>
+            <div class="m-art"></div><div class="m-t"><b>${t("Not Playing")}</b><em></em></div>
             <div class="m-c"><button data-m="prev">${svg2("prev", 28)}</button><button data-m="toggle" class="pp">${svg2("play", 34)}</button><button data-m="next">${svg2("next", 28)}</button></div>
         </div>
         ${tile("rotation", "rot")}${tile("silent", "bell")}
@@ -2153,12 +2351,12 @@
         <button class="mod s21 focus" data-key="focus" ${G("", 'data-press-scale="1.05"')}>${svg2("moon", 28)}<b>Focus</b></button>
         ${tile("flash", "flash")}${tile("timer", "timer")}${tile("calc", "calc")}${tile("cam", "cam")}
         ${tile("dark", "half")}${tile("lowpower", "batt")}
-    </div>`;
+    </div></div>${MUSIC}${CONN}</div>${DOTS}`;
     el.querySelectorAll("[data-glass]").forEach(registerGlass);
     const g2 = new Group({ p: 0 }, { response: 0.46, damping: 0.84 }, (v) => {
       const p = clamp(v.p, 0, 1.04);
       const bg = el.querySelector(".cc-bg");
-      const grid = el.querySelector(".cc-grid");
+      const grid = el.querySelector(".cc-pgs");
       bg.style.opacity = clamp(p, 0, 1).toFixed(3);
       grid.style.opacity = clamp(p * 1.4 - 0.1, 0, 1).toFixed(3);
       grid.style.transform = `scale(${(0.55 + 0.45 * p).toFixed(4)})`;
@@ -2184,9 +2382,12 @@
       silent: () => sys.set("silent", !sys.get("silent")),
       flash: () => sys.set("flash", !sys.get("flash"), false),
       dark: () => sys.set("theme", sys.get("theme") === "dark" ? "light" : "dark"),
-      lowpower: () => sys.set("lowpower", !sys.get("lowpower"))
+      lowpower: () => sys.set("lowpower", !sys.get("lowpower")),
+      airdrop: () => sys.set("airdrop", !sys.get("airdrop")),
+      hotspot: () => sys.set("hotspot", !sys.get("hotspot")),
+      vpn: () => sys.set("vpn", !sys.get("vpn"))
     };
-    const stateOf = {
+    const stateOf2 = {
       airplane: () => sys.get("airplane"),
       cellular: () => sys.get("cellular") && !sys.get("airplane"),
       wifi: () => sys.get("wifi"),
@@ -2196,10 +2397,16 @@
       silent: () => sys.get("silent"),
       flash: () => sys.get("flash"),
       dark: () => sys.get("theme") === "dark",
-      lowpower: () => sys.get("lowpower")
+      lowpower: () => sys.get("lowpower"),
+      airdrop: () => sys.get("airdrop"),
+      hotspot: () => sys.get("hotspot"),
+      vpn: () => sys.get("vpn")
     };
-    const refresh = () => el.querySelectorAll("[data-key]").forEach((b) => b.classList.toggle("on", !!stateOf[b.dataset.key]?.()));
-    ["airplane", "cellular", "wifi", "bt", "focus", "rotlock", "silent", "flash", "theme", "lowpower"].forEach((k) => sys.on(k, refresh));
+    const refresh = () => {
+      el.querySelectorAll("[data-key]").forEach((b) => b.classList.toggle("on", !!stateOf2[b.dataset.key]?.()));
+      el.querySelectorAll("[data-sub]").forEach((e) => e.textContent = stateOf2[e.dataset.sub]?.() ? t("On") : t("Off"));
+    };
+    ["airplane", "cellular", "wifi", "bt", "focus", "rotlock", "silent", "flash", "theme", "lowpower", "airdrop", "hotspot", "vpn"].forEach((k) => sys.on(k, refresh));
     el.addEventListener("click", (e) => {
       const appTile = e.target.closest(".tile");
       if (appTile && ["timer", "calc", "cam"].includes(appTile.dataset.key)) {
@@ -2223,17 +2430,19 @@
         else p?.[m.dataset.m]?.();
         return;
       }
-      if (!e.target.closest(".mod, .tile")) api.close();
+      if (!e.target.closest(".mod, .tile, .cc-dots")) api.close();
     });
     ["timer", "calc", "cam"].forEach((k) => delete toggles[k]);
     el.querySelectorAll("[data-slider]").forEach((s) => {
       const key = s.dataset.slider;
       const fill = s.querySelector(".vsf");
-      const draw = (v) => fill.style.height = `${(v * 100).toFixed(1)}%`;
+      const hz = s.dataset.orient === "h";
+      const draw = (v) => fill.style[hz ? "width" : "height"] = `${(v * 100).toFixed(1)}%`;
       sys.on(key, draw);
       const set = (e) => {
         const r = s.getBoundingClientRect();
-        const v = clamp(1 - (e.clientY - r.top) / r.height, key === "brightness" ? 0.04 : 0, 1);
+        const raw = hz ? (e.clientX - r.left) / r.width : 1 - (e.clientY - r.top) / r.height;
+        const v = clamp(raw, key === "brightness" ? 0.04 : 0, 1);
         sys.set(key, v, false);
         if (key === "volume") ctx.mod.showVolume?.();
       };
@@ -2255,11 +2464,64 @@
       s.addEventListener("pointercancel", up);
     });
     ctx.mod.ccMedia = (m) => {
-      el.querySelector(".m-t b").textContent = m?.title || "Not Playing";
-      el.querySelector(".m-t em").textContent = m?.artist || "";
-      el.querySelector(".m-art").style.background = m?.art || "rgba(255,255,255,.15)";
-      el.querySelector(".pp").innerHTML = svg2(m?.playing ? "pause" : "play", 34);
+      el.querySelectorAll(".m-t b").forEach((x) => x.textContent = m?.title || t("Not Playing"));
+      el.querySelectorAll(".m-t em").forEach((x) => x.textContent = m?.artist || "");
+      el.querySelectorAll(".m-art").forEach((x) => x.style.background = m?.art || "rgba(255,255,255,.15)");
+      el.querySelectorAll(".pp").forEach((x) => x.innerHTML = svg2(m?.playing ? "pause" : "play", 34));
     };
+    const pgs = [...el.querySelectorAll(".cc-pg")];
+    const dots = el.querySelector(".cc-dots");
+    const pager = new Group({ p: 0 }, { response: 0.45, damping: 0.86 }, (v) => pgs.forEach((pg, i) => {
+      const d = i - v.p;
+      pg.style.transform = `translate3d(0,${(d * 120).toFixed(1)}px,0)`;
+      pg.style.opacity = clamp(1 - Math.abs(d), 0, 1).toFixed(3);
+      pg.style.pointerEvents = Math.abs(d) < 0.5 ? "auto" : "none";
+    }));
+    pager.snap({ p: 0 });
+    const goPage = (i) => {
+      pager.to({ p: clamp(i, 0, 2) });
+      dots.querySelectorAll("button").forEach((b, j) => b.classList.toggle("on", j === clamp(i, 0, 2)));
+    };
+    goPage(0);
+    dots.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (b) goPage(+b.dataset.i);
+    });
+    let drag = null, moved = false;
+    el.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("[data-slider],.cc-dots")) return;
+      drag = { y: ctx.pt(e).y, id: e.pointerId, p0: pager.values.p, on: false, t: performance.now() };
+      moved = false;
+    });
+    el.addEventListener("pointermove", (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const dy = ctx.pt(e).y - drag.y;
+      if (!drag.on && Math.abs(dy) > 10) {
+        drag.on = moved = true;
+        try {
+          el.setPointerCapture(e.pointerId);
+        } catch {
+        }
+      }
+      if (drag.on) pager.drive({ p: clamp(drag.p0 - dy / 120, -0.25, 2.25) });
+    });
+    const endDrag = (e) => {
+      if (!drag || e.pointerId !== drag.id) return;
+      const d = drag;
+      drag = null;
+      if (!d.on) return;
+      const v = -(ctx.pt(e).y - d.y) / Math.max(0.05, (performance.now() - d.t) / 1e3) / 120;
+      goPage(Math.round(pager.values.p + clamp(v, -6, 6) * 0.1));
+    };
+    el.addEventListener("pointerup", endDrag);
+    el.addEventListener("pointercancel", endDrag);
+    el.addEventListener("click", (e) => {
+      if (moved) {
+        e.stopPropagation();
+        e.preventDefault();
+        moved = false;
+      }
+    }, true);
     const api = ctx.mod.cc = {
       get open() {
         return isOpen;
@@ -2284,6 +2546,7 @@
       },
       close(instant) {
         isOpen = false;
+        setTimeout(() => goPage(0), 350);
         if (instant) g2.snap({ p: 0 });
         else g2.to({ p: 0 }, { params: { response: 0.42, damping: 1 } });
         ctx.mod.wm.syncTone();
@@ -2297,8 +2560,8 @@
   function initSpotlight() {
     const el = ctx.el.spot;
     el.innerHTML = `<div class="sp-bg"></div>
-        <div class="sp-top"><div class="sp-field" data-glass data-glass-lite data-glass-static data-glass-bezel="22"><svg viewBox="0 0 24 24" width="18" height="18"><circle cx="10.500" cy="10.500" r="6.500" stroke="currentColor" stroke-width="2.200" fill="none"/><path d="M15.500 15.500 21 21" stroke="currentColor" stroke-width="2.200" stroke-linecap="round"/></svg><input data-kb inputmode="none" placeholder="Search" autocomplete="off"></div><button class="sp-cancel">Cancel</button></div>
-        <div class="sp-list"></div>`;
+        <div class="sp-list"></div>
+        <div class="sp-field" data-glass data-glass-lite data-glass-static data-glass-bezel="28"><svg viewBox="0 0 24 24" width="20" height="20"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2.4" fill="none"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg><input data-kb inputmode="none" enterkeyhint="search" placeholder="${t("Search")}" autocomplete="off"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div>`;
     registerGlass(el.querySelector(".sp-field"));
     const input = el.querySelector("input");
     const list = el.querySelector(".sp-list");
@@ -2308,27 +2571,35 @@
       el.style.visibility = p < 4e-3 ? "hidden" : "visible";
       el.style.pointerEvents = p > 0.5 ? "auto" : "none";
       el.querySelector(".sp-bg").style.opacity = p;
-      const top = el.querySelector(".sp-top");
+      const top = el.querySelector(".sp-field");
       top.style.opacity = clamp(p * 1.5 - 0.2, 0, 1);
-      top.style.transform = `translate3d(0,${(1 - p) * -24}px,0)`;
+      top.style.transform = `translate3d(0,${(1 - p) * 24}px,0)`;
       list.style.opacity = clamp(p * 1.5 - 0.3, 0, 1);
     });
     g2.snap({ p: 0 });
+    const norm2 = (x) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
+    const WEB = [["Apple iPhone 18 Pro", "apple.com/iphone-18-pro"], ["Liquid Glass - Apple Developer", "developer.apple.com/design"]];
+    const openApp = (id) => () => {
+      const r = ctx.mod.home.iconRect(id);
+      api.close();
+      ctx.mod.wm.open(id, r);
+    };
     function fill(q) {
       list.innerHTML = "";
-      const apps = Object.values(APPS).filter((a) => !q || a.name.toLowerCase().includes(q.toLowerCase()));
-      if (!apps.length) return void list.append(h("p.empty", "No Results"));
-      list.append(h("div.sp-h", q ? "Applications" : "Siri Suggestions"));
-      apps.slice(0, 8).forEach((a) => {
-        list.append(h("button.sp-row", { on: { click: () => {
-          const r = ctx.mod.home.iconRect(a.id);
-          api.close();
-          ctx.mod.wm.open(a.id, r);
-        } }, html: `<span class="mini">${iconHTML(a.id, a.name)}</span><b>${a.name}</b>` }));
-      });
+      if (!q) {
+        const ids = ["tiktok", "settings", "files", "messages", "safari", "music"].filter((id) => APPS[id] && !APPS[id].cloud).slice(0, 4);
+        list.append(h("div.sp-hd", { html: `<b>${t("Siri Suggestions")}</b><span>${locale === "vi" ? "Hi\u1EC3n th\u1ECB th\xEAm" : "Show More"}</span>` }));
+        list.append(h("div.sp-sug", ids.map((id) => h("button", { on: { click: openApp(id) }, html: `${iconHTML(id, APPS[id].name)}<span>${APPS[id].name}</span>` }))));
+        list.append(h("div.sp-sec", locale === "vi" ? "Th\u01B0 gi\xE3n" : "Relax"));
+        WEB.forEach(([ti, u]) => list.append(h("div.sp-web", { html: `<span class="mini">${iconHTML("safari", "Safari")}</span><div><b>${ti}</b><em>${u}</em></div>` })));
+        return;
+      }
+      const apps = Object.values(APPS).filter((a) => !a.cloud && norm2(a.name).includes(norm2(q)));
+      if (!apps.length) return void list.append(h("p.empty", t("No Results")));
+      list.append(h("div.sp-hd", { html: `<b>${t("Applications")}</b>` }));
+      apps.slice(0, 8).forEach((a) => list.append(h("button.sp-row", { on: { click: openApp(a.id) }, html: `<span class="mini">${iconHTML(a.id, a.name)}</span><span>${a.name}</span>` })));
     }
     input.addEventListener("input", () => fill(input.value));
-    el.querySelector(".sp-cancel").addEventListener("click", () => api.close());
     el.querySelector(".sp-bg").addEventListener("click", () => api.close());
     const api = ctx.mod.spot = {
       get open() {
@@ -2398,17 +2669,17 @@
         keys.append(row(N1.map((c) => key(c))), row(N2.map((c) => key(c))));
         keys.append(row([key("#+=", { v: "noop", cls: "fn" }), ...N3.map((c) => key(c)), key("", { v: "del", cls: "fn", html: '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M9 5h11a1.500 1.500 0 0 1 1.500 1.500v11A1.500 1.500 0 0 1 20 19H9l-6-7z" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linejoin="round"/><path d="M12.500 9.500l5 5M17.500 9.500l-5 5" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/></svg>' })], "r3 n"));
       }
-      keys.append(row([key(st.mode === "abc" ? "123" : "ABC", { v: "mode", cls: "fn" }), key("space", { v: " ", cls: "space" }), key("return", { v: "ret", cls: "fn ret" })], "r4"));
+      keys.append(row([key(st.mode === "abc" ? "123" : "ABC", { v: "mode", cls: "fn" }), key("", { v: " ", cls: "space", html: '<i class="lg">VI EN</i>' }), key("return", { v: "ret", cls: "fn ret" })], "r4"));
     }
     render2();
-    function insert(t) {
+    function insert(t2) {
       const tg = st.target;
       if (!tg) return;
-      if (tg.isContentEditable) document.execCommand("insertText", false, t);
+      if (tg.isContentEditable) document.execCommand("insertText", false, t2);
       else {
         const s = tg.selectionStart ?? tg.value.length;
         const e = tg.selectionEnd ?? s;
-        tg.setRangeText(t, s, e, "end");
+        tg.setRangeText(t2, s, e, "end");
         tg.dispatchEvent(new Event("input", { bubbles: true }));
       }
     }
@@ -2492,7 +2763,7 @@
     };
     keys.addEventListener("pointerup", up);
     keys.addEventListener("pointercancel", up);
-    const isField = (t) => t?.matches?.("input[data-kb],textarea[data-kb],[contenteditable][data-kb]");
+    const isField = (t2) => t2?.matches?.("input[data-kb],textarea[data-kb],[contenteditable][data-kb]");
     ctx.screen.addEventListener("focusin", (e) => isField(e.target) && api.show(e.target));
     ctx.screen.addEventListener("focusout", (e) => {
       if (isField(e.target)) setTimeout(() => !isField(document.activeElement) && api.hide(), 30);
@@ -2502,14 +2773,14 @@
         return st.vis;
       },
       height: KB_H,
-      show(t) {
-        st.target = t;
+      show(t2) {
+        st.target = t2;
         if (!st.vis) {
           st.vis = true;
           g2.to({ y: 0 });
         }
         st.mode = "abc";
-        st.shift = !t.value;
+        st.shift = !t2.value && t2.getAttribute("enterkeyhint") !== "search" && t2.type !== "url";
         render2();
       },
       hide() {
@@ -2678,6 +2949,296 @@
     });
   }
 
+  // js/system/assistive.js
+  init_glass();
+  var T = (s) => {
+    const [vi, en] = s.split("|");
+    return locale === "vi" ? vi : en || vi;
+  };
+  var svg3 = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  var open = (id) => () => ctx.mod.wm.open(id);
+  var note = (m) => ctx.mod.island.alert(m, "bell", 2200);
+  var AT_ACTIONS = {
+    home: ["M\xE0n h\xECnh ch\xEDnh|Home", svg3(`<path d="M4 11l8-7 8 7v9H4z"/>`), () => ctx.mod.wm.goHome()],
+    cc: ["Trung t\xE2m \u0111i\u1EC1u khi\u1EC3n|Control Center", svg3(`<path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/>`), () => ctx.mod.cc.openIt()],
+    siri: ["Siri", svg3(`<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>`), () => ctx.mod.siri.start()],
+    lock: ["Kho\xE1 m\xE0n h\xECnh|Lock Screen", svg3(`<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>`), () => ctx.mod.lock.lock()],
+    search: ["T\xECm ki\u1EBFm|Search", svg3(`<circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/>`), () => ctx.mod.spot.openIt()],
+    img: ["T\xECm ki\u1EBFm h\xECnh \u1EA3nh b\u1EB1ng Google|Google Image Search", svg3(`<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 12l9 5 9-5M3 16l9 5 9-5"/>`), open("safari")],
+    music: ["Music Finder", svg3(`<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>`), open("music")],
+    rotate: ["Xoay m\xE0n h\xECnh|Rotate Screen", svg3(`<path d="M20 12a8 8 0 1 1-3-6.200M20 4v4h-4"/>`), () => note(T("Ch\u01B0a h\u1ED7 tr\u1EE3 xoay ngang|Landscape is not supported yet"))],
+    rotlock: [() => sys.get("rotlock") ? T("M\u1EDF kho\xE1 xoay m\xE0n h\xECnh|Unlock Rotation") : T("Kho\xE1 xoay m\xE0n h\xECnh|Lock Rotation"), svg3(`<rect x="8" y="11" width="8" height="7" rx="1.500"/><path d="M10 11V9a2 2 0 0 1 4 0v2M20 12a8 8 0 1 1-3-6.200"/>`), () => sys.set("rotlock", !sys.get("rotlock"))],
+    silent: [() => sys.get("silent") ? T("B\u1EADt ti\u1EBFng|Unmute") : T("T\u1EAFt ti\u1EBFng|Mute"), svg3(`<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4M4 4l16 16"/>`), () => sys.set("silent", !sys.get("silent"))],
+    translate: ["Google D\u1ECBch|Translate", svg3(`<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>`), open("translate")],
+    volup: ["T\u0103ng \xE2m l\u01B0\u1EE3ng|Volume Up", svg3(`<path d="M4 9h4l5-4v14l-5-4H4zM17 9a4 4 0 0 1 0 6"/>`), () => sys.set("volume", clamp(sys.get("volume") + 0.1, 0, 1))],
+    voldown: ["Gi\u1EA3m \xE2m l\u01B0\u1EE3ng|Volume Down", svg3(`<path d="M4 9h4l5-4v14l-5-4H4z"/>`), () => sys.set("volume", clamp(sys.get("volume") - 0.1, 0, 1))],
+    shot: ["Ch\u1EE5p m\xE0n h\xECnh|Screenshot", svg3(`<path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><circle cx="12" cy="12" r="3"/>`), () => {
+      const f = h("div.shot-flash");
+      ctx.screen.append(f);
+      setTimeout(() => f.remove(), 500);
+    }]
+  };
+  var POS = [[50, 14], [16, 38], [84, 38], [16, 68], [84, 68], [50, 90]];
+  var lab = (a) => typeof a[0] === "function" ? a[0]() : T(a[0]);
+  function initAssistive() {
+    const S = 60, M = 8;
+    const el = h("button.atb", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "20", "aria-label": "AssistiveTouch", html: svg3(`<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5.500"/><circle cx="12" cy="12" r="2"/>`) });
+    const bg = h("div.at-bg");
+    const menu = h("div.at-menu", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "46" });
+    ctx.screen.append(bg, menu, el);
+    requestAnimationFrame(() => {
+      registerGlass(el);
+      registerGlass(menu);
+    });
+    const saved = store.get("atpos", { side: "r", y: 620 });
+    const pos = { x: 0, y: clamp(saved.y, 70, H - 130), side: saved.side };
+    const sideX = (s) => s === "l" ? M : W - S - M;
+    const render2 = () => el.style.translate = `${pos.x}px ${pos.y}px`;
+    pos.x = sideX(pos.side);
+    render2();
+    sys.on("at", (v) => el.style.display = v ? "" : "none");
+    let menuOpen = false, idleT, tapT, longT, lastTap = 0, d = null;
+    const wake2 = () => {
+      el.classList.remove("idle");
+      clearTimeout(idleT);
+      idleT = setTimeout(() => !menuOpen && el.classList.add("idle"), 3e3);
+    };
+    const run = (a) => a === "menu" ? openMenu() : AT_ACTIONS[a]?.[2]();
+    function openMenu() {
+      if (menuOpen) return;
+      menuOpen = true;
+      wake2();
+      const ids = sys.get("atItems");
+      menu.querySelectorAll(".at-i").forEach((n) => n.remove());
+      ids.forEach((id, i) => {
+        const a = AT_ACTIONS[id];
+        if (!a) return;
+        const [x, y] = POS[i] || [50, 50];
+        const b = h("button.at-i", { style: { left: x + "%", top: y + "%", "--i": i }, html: `${a[1]}<span>${lab(a)}</span>` });
+        b.addEventListener("click", () => {
+          closeMenu();
+          setTimeout(() => a[2](), 180);
+        });
+        menu.append(b);
+      });
+      const mx = (W - 300) / 2, my = (H - 300) / 2;
+      menu.style.left = mx + "px";
+      menu.style.top = my + "px";
+      menu.style.transformOrigin = `${pos.x + S / 2 - mx}px ${pos.y + S / 2 - my}px`;
+      el.classList.add("away");
+      bg.classList.add("on");
+      requestAnimationFrame(() => menu.classList.add("open"));
+    }
+    function closeMenu() {
+      if (!menuOpen) return;
+      menuOpen = false;
+      menu.classList.remove("open");
+      bg.classList.remove("on");
+      el.classList.remove("away");
+      wake2();
+    }
+    bg.addEventListener("pointerdown", closeMenu);
+    el.addEventListener("pointerdown", (e) => {
+      const p = ctx.pt(e);
+      d = { x: p.x, y: p.y, ox: pos.x, oy: pos.y, id: e.pointerId, drag: false, long: false };
+      try {
+        el.setPointerCapture(e.pointerId);
+      } catch {
+      }
+      wake2();
+      longT = setTimeout(() => {
+        if (d && !d.drag) {
+          d.long = true;
+          run(sys.get("atLong"));
+        }
+      }, 650);
+    });
+    el.addEventListener("pointermove", (e) => {
+      if (!d || e.pointerId !== d.id) return;
+      const p = ctx.pt(e), dx = p.x - d.x, dy = p.y - d.y;
+      if (!d.drag && Math.abs(dx) + Math.abs(dy) > 6) {
+        d.drag = true;
+        clearTimeout(longT);
+        el.classList.add("drag");
+      }
+      if (d.drag) {
+        pos.x = clamp(d.ox + dx, 0, W - S);
+        pos.y = clamp(d.oy + dy, 70, H - 130);
+        render2();
+      }
+    });
+    const up = (e) => {
+      if (!d || e.pointerId !== d.id) return;
+      clearTimeout(longT);
+      const was = d;
+      d = null;
+      el.classList.remove("drag");
+      if (was.drag) {
+        pos.side = pos.x + S / 2 < W / 2 ? "l" : "r";
+        pos.x = sideX(pos.side);
+        store.set("atpos", { side: pos.side, y: pos.y });
+        render2();
+      } else if (!was.long) {
+        const now = performance.now();
+        if (now - lastTap < 280) {
+          clearTimeout(tapT);
+          lastTap = 0;
+          run(sys.get("atDouble"));
+        } else {
+          lastTap = now;
+          tapT = setTimeout(() => run(sys.get("atTap")), 280);
+        }
+      }
+    };
+    el.addEventListener("pointerup", up);
+    el.addEventListener("pointercancel", up);
+    addEventListener("keydown", (e) => e.key === "Escape" && closeMenu());
+    wake2();
+    ctx.mod.at = { openMenu, closeMenu, get open() {
+      return menuOpen;
+    } };
+  }
+
+  // js/system/siri.js
+  init_glass();
+  var T2 = (s) => {
+    const [vi, en] = s.split("|");
+    return locale === "vi" ? vi : en || vi;
+  };
+  var norm = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase().trim();
+  function parse(raw) {
+    const q = norm(raw);
+    const on = /\b(bat|turn on|enable)\b/.test(q) ? true : /\b(tat|turn off|disable)\b/.test(q) ? false : null;
+    const sw2 = (key, name) => {
+      const v = on === null ? !sys.get(key) : on;
+      sys.set(key, v);
+      return T2(`\u0110\xE3 ${v ? "b\u1EADt" : "t\u1EAFt"} ${name}.|${name} is ${v ? "on" : "off"}.`);
+    };
+    let m = q.match(/^(?:mo|open|launch|chay)\s+(?:ung dung\s+|app\s+)?(.+)$/);
+    if (m) {
+      const want = m[1].replace(/^app\s+/, "");
+      const hit = Object.entries(APPS).find(([id, a]) => id === want || norm(a.name) === want) || Object.entries(APPS).find(([id, a]) => norm(a.name).includes(want));
+      if (hit) {
+        setTimeout(() => ctx.mod.wm.open(hit[0]), 450);
+        return T2(`\u0110ang m\u1EDF ${hit[1].name}.|Opening ${hit[1].name}.`);
+      }
+      return T2(`M\xECnh kh\xF4ng t\xECm th\u1EA5y \u201C${m[1]}\u201D.|I couldn't find \u201C${m[1]}\u201D.`);
+    }
+    if (/den pin|flashlight|torch/.test(q)) return sw2("flash", T2("\u0111\xE8n pin|the flashlight"));
+    if (/che do toi|dark mode/.test(q)) {
+      sys.set("theme", "dark");
+      return T2("\u0110\xE3 chuy\u1EC3n sang ch\u1EBF \u0111\u1ED9 t\u1ED1i.|Dark mode is on.");
+    }
+    if (/che do sang|light mode/.test(q)) {
+      sys.set("theme", "light");
+      return T2("\u0110\xE3 chuy\u1EC3n sang ch\u1EBF \u0111\u1ED9 s\xE1ng.|Light mode is on.");
+    }
+    if (/wi-?fi/.test(q)) return sw2("wifi", "Wi-Fi");
+    if (/bluetooth/.test(q)) return sw2("bt", "Bluetooth");
+    if (/may bay|airplane/.test(q)) return sw2("airplane", T2("ch\u1EBF \u0111\u1ED9 m\xE1y bay|Airplane Mode"));
+    m = q.match(/(do sang|brightness|am luong|volume)\D*(\d{1,3})/);
+    if (m) {
+      const v = Math.min(100, +m[2]) / 100, br = /sang|bright/.test(m[1]);
+      sys.set(br ? "brightness" : "volume", br ? Math.max(0.04, v) : v);
+      return T2(`\u0110\xE3 \u0111\u1EB7t ${br ? "\u0111\u1ED9 s\xE1ng" : "\xE2m l\u01B0\u1EE3ng"} ${m[2]}%.|${br ? "Brightness" : "Volume"} set to ${m[2]}%.`);
+    }
+    if (/may gio|what time|\btime\b/.test(q)) return T2("B\xE2y gi\u1EDD l\xE0 |It's ") + (/* @__PURE__ */ new Date()).toLocaleTimeString(LOC, { hour: "2-digit", minute: "2-digit" }) + ".";
+    if (/ngay|hom nay|\bdate\b|today/.test(q)) return (/* @__PURE__ */ new Date()).toLocaleDateString(LOC, { weekday: "long", day: "numeric", month: "long", year: "numeric" }) + ".";
+    if (/phat nhac|play music/.test(q)) {
+      setTimeout(() => ctx.mod.wm.open("music"), 450);
+      return T2("\u0110ang m\u1EDF Nh\u1EA1c.|Opening Music.");
+    }
+    if (/^(tim|search)\b/.test(q)) {
+      setTimeout(() => ctx.mod.wm.open("safari"), 450);
+      return T2("\u0110ang t\xECm tr\xEAn web.|Searching the web.");
+    }
+    return T2("M\xECnh ch\u01B0a hi\u1EC3u. Th\u1EED: \u201Cm\u1EDF C\xE0i \u0111\u1EB7t\u201D, \u201Cb\u1EADt \u0111\xE8n pin\u201D, \u201Cm\u1EA5y gi\u1EDD r\u1ED3i\u201D.|I didn't get that. Try \u201Copen Settings\u201D, \u201Cturn on the flashlight\u201D, \u201Cwhat time is it\u201D.");
+  }
+  function initSiri() {
+    const input = h("input.siri-in", { placeholder: T2("G\xF5 cho Siri|Type to Siri"), "data-kb": "", inputmode: "none" });
+    const sq = h("p.sq"), sa = h("p.sa");
+    const card = h("div.siri-card", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "30" }, [sq, sa, input]);
+    const root = h("div.siri", [h("div.siri-bg"), h("div.siri-edge"), h("div.siri-orb", [h("i")]), card]);
+    ctx.screen.append(root);
+    requestAnimationFrame(() => registerGlass(card));
+    let isOpen = false, timer, rec;
+    const api = ctx.mod.siri = {
+      get open() {
+        return isOpen;
+      },
+      start() {
+        if (isOpen) return;
+        isOpen = true;
+        root.dataset.style = sys.get("siriStyle");
+        root.classList.add("on");
+        sq.textContent = T2("M\xECnh \u0111ang nghe\u2026|Listening\u2026");
+        sa.textContent = "";
+        input.value = "";
+        clearTimeout(timer);
+        timer = setTimeout(api.stop, 8e3);
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SR) {
+          try {
+            rec = new SR();
+            rec.lang = locale === "vi" ? "vi-VN" : "en-US";
+            rec.onresult = (e) => api.ask(e.results[0][0].transcript);
+            rec.onerror = () => {
+            };
+            rec.start();
+          } catch {
+          }
+        }
+      },
+      ask(text) {
+        if (!isOpen) api.start();
+        sq.textContent = text;
+        sa.textContent = parse(text);
+        clearTimeout(timer);
+        timer = setTimeout(api.stop, 6e3);
+      },
+      stop() {
+        if (!isOpen) return;
+        isOpen = false;
+        root.classList.remove("on");
+        clearTimeout(timer);
+        try {
+          rec?.abort();
+        } catch {
+        }
+      }
+    };
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && input.value.trim()) {
+        api.ask(input.value);
+        input.value = "";
+      }
+      e.stopPropagation();
+    });
+    root.querySelector(".siri-bg").addEventListener("pointerdown", api.stop);
+    addEventListener("keydown", (e) => {
+      if (e.key === "Escape") api.stop();
+      else if (e.key.toLowerCase() === "s" && !e.ctrlKey && !e.metaKey && !e.target.closest?.("input,textarea")) api.start();
+    });
+    const pw = ctx.phone.querySelector('[data-hw="power"]');
+    if (pw) {
+      let ht, held = false;
+      pw.addEventListener("pointerdown", () => {
+        held = false;
+        ht = setTimeout(() => {
+          held = true;
+          api.start();
+        }, 700);
+      });
+      ["pointerup", "pointerleave", "pointercancel"].forEach((ev) => pw.addEventListener(ev, () => clearTimeout(ht)));
+      pw.addEventListener("click", (e) => {
+        if (held) {
+          e.stopImmediatePropagation();
+          held = false;
+        }
+      }, true);
+    }
+  }
+
   // js/apps/index.js
   var NAMES = {
     phone: "Phone",
@@ -2719,7 +3280,7 @@
           return iconHTML(id, name);
         },
         build(root) {
-          root.append(h("div.ph", { html: `<span class="mini big">${iconHTML(id, name)}</span><h2>${name}</h2><p>This app isn\u2019t part of the simulator yet.<br>Swipe up from the bottom edge to go home.</p>` }));
+          root.append(h("div.ph", { html: `<span class="mini big">${iconHTML(id, name)}</span><h2>${name}</h2><p>${locale === "vi" ? "\u1EE8ng d\u1EE5ng n\xE0y ch\u01B0a c\xF3 trong simulator.<br>Vu\u1ED1t l\xEAn t\u1EEB c\u1EA1nh d\u01B0\u1EDBi \u0111\u1EC3 v\u1EC1 m\xE0n h\xECnh ch\xEDnh." : "This app isn\u2019t part of the simulator yet.<br>Swipe up from the bottom edge to go home."}</p>` }));
         }
       });
     }
@@ -2802,13 +3363,13 @@
   function tabBar(tabs, initial, onSelect) {
     const bar = h("div.tabbar", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "32" });
     const lens = h("i.tlens", { "data-glass": "", "data-glass-static": "", "data-glass-manual": "", "data-glass-bezel": "26", "data-glass-thickness": "50", "data-glass-blur": "2", "data-glass-refraction": "1.1" });
-    const btns = tabs.map((t) => h("button.tab", { on: { click: () => select(t.id) }, html: `${t.icon}<span>${t.label}</span>` }));
+    const btns = tabs.map((t2) => h("button.tab", { on: { click: () => select(t2.id) }, html: `${t2.icon}<span>${t2.label}</span>` }));
     bar.append(lens, ...btns);
     bar.style.setProperty("--n", tabs.length);
     requestAnimationFrame(() => (registerGlass(bar), registerGlass(lens)));
     let cur = initial;
     function select(id, silent) {
-      const idx = tabs.findIndex((t) => t.id === id);
+      const idx = tabs.findIndex((t2) => t2.id === id);
       cur = id;
       bar.style.setProperty("--i", idx);
       btns.forEach((b, j) => b.classList.toggle("on", j === idx));
@@ -2911,6 +3472,7 @@
   };
 
   // js/apps/settings.js
+  init_glass();
   var ic = (d, f = "none") => `<svg viewBox="0 0 24 24" fill="${f}" stroke="${f === "none" ? "#fff" : "none"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
   var I2 = {
     air: ic(`<path d="M21 16v-2l-8-5V3.500a1.500 1.500 0 0 0-3 0V9l-8 5v2l8-2.500V19l-2 1.500V22l3.500-1 3.500 1v-1.500L13 19v-5.500z"/>`, "#fff"),
@@ -2927,7 +3489,56 @@
     phone: ic(`<rect x="7" y="2.500" width="10" height="19" rx="2.600"/><path d="M10.500 5.500h3"/>`),
     sw: ic(`<path d="M4 7h16M4 12h16M4 17h16"/>`)
   };
+  var I22 = {
+    upd: ic(`<path d="M12 4v10M8 10l4 4 4-4M5 19h14"/>`),
+    acc: ic(`<circle cx="12" cy="5" r="1.800"/><path d="M5 9h14M12 9v6M8.500 21l3.500-6 3.500 6"/>`),
+    cam: ic(`<rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.500" r="3.500"/>`),
+    stby: ic(`<rect x="3" y="6" width="18" height="12" rx="3"/><path d="M8 12h3"/>`),
+    appr: ic(`<circle cx="12" cy="12" r="8.500"/><path d="M12 3.500a8.500 8.500 0 0 1 0 17z" fill="#fff"/>`),
+    siri: ic(`<circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2.500"/>`),
+    srch: ic(`<circle cx="11" cy="11" r="6.500"/><path d="M16 16l4.500 4.500"/>`),
+    batt: ic(`<rect x="3" y="8" width="16" height="9" rx="2.500"/><path d="M21 11v3"/>`),
+    vpn: ic(`<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>`),
+    link: ic(`<path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/>`),
+    hour: ic(`<path d="M7 3h10M7 21h10M8 3c0 6 8 6 8 12v6M16 3c0 6-8 6-8 12v6"/>`),
+    face: ic(`<path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v2M15 10v2M9.500 16c1.500 1 3.500 1 5 0"/>`),
+    hand: ic(`<path d="M8 21v-9a1 1 0 0 1 2 0v-4a1 1 0 0 1 2 0v-1a1 1 0 0 1 2 0v1a1 1 0 0 1 2 0v8c0 3-2 5-5 5s-5-1-5-3"/>`),
+    game: ic(`<circle cx="9" cy="9" r="4"/><circle cx="15" cy="15" r="4"/>`),
+    cloud: ic(`<path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9a4.500 4.500 0 0 1 0 9z"/>`),
+    wlt: ic(`<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18"/>`),
+    sos: `<b style="font-size:11px;color:#fff">SOS</b>`
+  };
+  var T3 = (s) => {
+    const [vi, en] = s.split("|");
+    return locale === "vi" ? vi : en || vi;
+  };
+  var SP = {
+    upd: [[["C\u1EADp nh\u1EADt t\u1EF1 \u0111\u1ED9ng|Automatic Updates", "d", "B\u1EADt|On"]], [["iOS 27.0.1", "d", "C\xF3 s\u1EB5n|Available"]]],
+    bt: [[["Bluetooth", "t", "bt"]], [["Thi\u1EBFt b\u1ECB c\u1EE7a t\xF4i|My Devices", "d", "Kh\xF4ng c\xF3|None"]]],
+    cell: [[["D\u1EEF li\u1EC7u di \u0111\u1ED9ng|Cellular Data", "t", "cellular"]], [["Chuy\u1EC3n v\xF9ng d\u1EEF li\u1EC7u|Data Roaming", "t", "roam"], ["Ch\u1EBF \u0111\u1ED9 d\u1EEF li\u1EC7u th\u1EA5p|Low Data Mode", "t", "lowdata"]]],
+    hot: [[["Cho ph\xE9p ng\u01B0\u1EDDi kh\xE1c k\u1EBFt n\u1ED1i|Allow Others to Join", "t", "hotspot"]]],
+    batt: [[["Ch\u1EBF \u0111\u1ED9 ngu\u1ED3n \u0111i\u1EC7n th\u1EA5p|Low Power Mode", "t", "lowpower"], ["Ph\u1EA7n tr\u0103m pin|Battery Percentage", "t", "battpct"]], [["T\xECnh tr\u1EA1ng pin|Battery Health", "d", "100%"]]],
+    vpn: [[["VPN", "t", "vpn"]]],
+    acc: [[["AssistiveTouch", "t", "at"], ["Gi\u1EA3m \u0111\u1ED9 trong|Reduce Transparency", "t", "reduceTransp"], ["Gi\u1EA3m chuy\u1EC3n \u0111\u1ED9ng|Reduce Motion", "t", "reduceMotion"], ["T\u0103ng \u0111\u1ED9 t\u01B0\u01A1ng ph\u1EA3n|Increase Contrast", "t", "hiContrast"]], [["VoiceOver", "d", "T\u1EAFt|Off"], ["Thu ph\xF3ng|Zoom", "d", "T\u1EAFt|Off"]]],
+    cam: [[["L\u01B0\u1EDBi|Grid", "t", "camGrid"], ["G\u01B0\u01A1ng camera tr\u01B0\u1EDBc|Mirror Front Camera", "t", "camMirror"]]],
+    stby: [[["Ch\u1EBF \u0111\u1ED9 ch\u1EDD|StandBy", "t", "standby"], ["Ch\u1EBF \u0111\u1ED9 ban \u0111\xEAm|Night Mode", "t", "standbyNight"]]],
+    hs: [[["Huy hi\u1EC7u th\xF4ng b\xE1o|Notification Badges", "t", "badges"], ["Th\u01B0 vi\u1EC7n \u1EE9ng d\u1EE5ng|App Library", "d", "B\u1EADt|On"]]],
+    siri: [[["L\u1EAFng nghe \u201CSiri\u201D|Listen for \u201CSiri\u201D", "t", "siriListen"], ["Nh\u1EA5n n\xFAt s\u01B0\u1EDDn \u0111\u1EC3 d\xF9ng Siri|Press Side Button for Siri", "t", "siriSide"]], [["Ng\xF4n ng\u1EEF|Language", "d", "Ti\u1EBFng Vi\u1EC7t|English"]]],
+    srch: [[["Hi\u1EC7n G\u1EE3i \xFD c\u1EE7a Siri|Show Siri Suggestions", "t", "srchSug"], ["Hi\u1EC7n khi t\xECm ki\u1EBFm|Show in Search", "t", "srchShow"]]],
+    cc: [[["Truy c\u1EADp trong \u1EE9ng d\u1EE5ng|Access Within Apps", "t", "ccApps"]]],
+    notif: [[["Xem tr\u01B0\u1EDBc|Show Previews", "d", "Khi m\u1EDF kho\xE1|When Unlocked"], ["T\xF3m t\u1EAFt theo l\u1ECBch|Scheduled Summary", "t", "notifSum"]]],
+    focus: [[["Kh\xF4ng l\xE0m phi\u1EC1n|Do Not Disturb", "t", "dnd"]], [["Ng\u1EE7|Sleep", "c"], ["L\xE0m vi\u1EC7c|Work", "c"]]],
+    sct: [[["Th\u1EDDi gian s\u1EED d\u1EE5ng|Screen Time", "t", "sct"]], [["Gi\u1EDBi h\u1EA1n \u1EE9ng d\u1EE5ng|App Limits", "c"]]],
+    fid: [[["M\xF4 ph\u1ECFng Face ID th\u1EA5t b\u1EA1i|Simulate Face ID Failure", "t", "faceidFail"], ["M\u1EDF kho\xE1 iPhone|Unlock iPhone", "t", "fidUnlock"], ["Face ID cho App Store|iTunes & App Store", "t", "fidStore"]], [["\u0110\u1ED5i m\u1EADt m\xE3|Change Passcode", "c"]]],
+    sos: [[["G\u1ECDi b\u1EB1ng n\xFAt s\u01B0\u1EDDn|Call with Side Button", "t", "sosSide"], ["Ph\xE1t hi\u1EC7n va ch\u1EA1m|Crash Detection", "t", "sosCrash"]]],
+    priv: [[["D\u1ECBch v\u1EE5 \u0111\u1ECBnh v\u1ECB|Location Services", "t", "loc"]], [["Theo d\xF5i|Tracking", "c"], ["Camera", "c"], ["Micro|Microphone", "c"]]],
+    game: [[["Tr\u1EA1ng th\xE1i ho\u1EA1t \u0111\u1ED9ng|Activity Status", "t", "gcStatus"]]],
+    icloud: [[["Sao l\u01B0u iCloud|iCloud Backup", "t", "icBackup"], ["\u1EA2nh|Photos", "d", "T\u1EAFt|Off"]]],
+    wlt: [[["Nh\u1EA5n \u0111\xFAp n\xFAt s\u01B0\u1EDDn|Double-Click Side Button", "t", "walletDbl"]]],
+    apps: [[["\u1EE8ng d\u1EE5ng m\u1EB7c \u0111\u1ECBnh|Default Apps", "c"], ["Safari", "c"], ["Tin nh\u1EAFn|Messages", "c"], ["\u0110i\u1EC7n tho\u1EA1i|Phone", "c"]]]
+  };
   function initSettings() {
+    requestAnimationFrame(() => sys.on("reduceTransp", (v) => ctx.screen.toggleAttribute("data-reduce-transp", !!v)));
     registerApp({
       id: "settings",
       name: "Settings",
@@ -2943,34 +3554,42 @@
           return nav.push(p.el);
         };
         const wifiPage = () => sub(
-          "Wi-Fi",
-          group([cell({ title: "Wi-Fi", right: (() => {
-            const t = toggle(sys.get("wifi"), (v) => sys.set("wifi", v));
-            sys.on("wifi", (v) => t.set(v));
-            return t;
+          t("Wi-Fi"),
+          group([cell({ title: t("Wi-Fi"), right: (() => {
+            const t2 = toggle(sys.get("wifi"), (v) => sys.set("wifi", v));
+            sys.on("wifi", (v) => t2.set(v));
+            return t2;
           })() })]),
           group([cell({ title: "Home Network", detail: "Connected" }), cell({ title: "Guest", chev: true })], "Simulated networks.")
         );
         const aboutPage = () => {
-          const row = (a, b) => cell({ title: a, detail: b });
+          const row2 = (a, b) => cell({ title: a, detail: b });
           sub(
-            "About",
-            group([row("Name", "iPhone"), row("iOS Version", "27.0"), row("Model Name", "iPhone 18 Pro Max"), row("Model Number", "A3xxx (simulated)")]),
-            group([row("Display", "6.9-inch Super Retina XDR"), row("Resolution", "2868 \xD7 1320 \xB7 460 ppi"), row("Points", "440 \xD7 956 @3x"), row("Chip", "A20 Pro"), row("Memory", "12 GB")]),
-            group([row("Dimensions", "163.4 \xD7 78 \xD7 8.75 mm"), row("Dynamic Island", "16.57 mm"), row("Finish", sys.get("color")[0].toUpperCase() + sys.get("color").slice(1))], "This is a web simulator. Not affiliated with Apple.")
+            t("About"),
+            group([row2(t("Name"), "iPhone"), row2(t("iOS Version"), VERSION.ios), row2(t("Simulator Version"), VERSION.simulator), row2(t("Model Name"), VERSION.device), row2("Model Number", "A3xxx (simulated)")]),
+            group([row2("Display", "6.9-inch Super Retina XDR"), row2("Resolution", "2868 \xD7 1320 \xB7 460 ppi"), row2("Points", "440 \xD7 956 @3x"), row2("Chip", "A20 Pro"), row2("Memory", "12 GB")]),
+            group([row2("Dimensions", "163.4 \xD7 78 \xD7 8.75 mm"), row2("Dynamic Island", "16.57 mm"), row2("Finish", sys.get("color")[0].toUpperCase() + sys.get("color").slice(1))], "This is a web simulator. Not affiliated with Apple.")
           );
         };
         const displayPage = () => {
-          const seg = segmented([["light", "Light"], ["dark", "Dark"]], sys.get("theme"), (v) => sys.set("theme", v));
+          const seg = segmented([["light", t("Light")], ["dark", t("Dark")]], sys.get("theme"), (v) => sys.set("theme", v));
           sys.on("theme", (v) => seg.set(v), false);
           const bright = slider(sys.get("brightness"), (v) => sys.set("brightness", Math.max(0.04, v)), { min: 0.04, max: 1 });
+          sub(
+            t("Display & Brightness"),
+            group([cell({ title: t("Appearance"), right: seg })]),
+            group([cell({ icon: I2.sun, color: "#0a84ff", title: t("Brightness") }), h("div.pad", bright)])
+          );
+        };
+        const appearancePage = () => {
+          const seg = segmented([["light", t("Light")], ["dark", t("Dark")]], sys.get("theme"), (v) => sys.set("theme", v));
+          sys.on("theme", (v) => seg.set(v), false);
           const glass = slider(sys.get("glass"), (v) => sys.set("glass", v));
           const demo = h("div.gdemo", { style: { background: ctx.mod.home.wallpaperEl.style.background } }, h("div.glens", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "30" }, "Liquid Glass"));
           sub(
-            "Display & Brightness",
-            group([cell({ title: "Appearance", right: seg })]),
-            group([cell({ icon: I2.sun, color: "#0a84ff", title: "Brightness" }), h("div.pad", bright)]),
-            h("div.grpw", [h("p.foot.up", "Liquid Glass"), h("div.grp", [demo, h("div.pad.lbls", [h("span", "Clear"), h("span", "Tinted")]), h("div.pad", glass)]), h("p.foot", "Choose how clear or tinted Liquid Glass looks across the system.")])
+            T3("Giao di\u1EC7n|Appearance"),
+            group([cell({ title: T3("Ch\u1EBF \u0111\u1ED9|Mode"), right: seg })]),
+            h("div.grpw", [h("p.foot.up", "Liquid Glass"), h("div.grp", [demo, h("div.pad.lbls", [h("span", T3("Trong|Clear")), h("span", T3("Pha m\xE0u|Tinted"))]), h("div.pad", glass)]), h("p.foot", T3("K\xE9o thanh tr\u01B0\u1EE3t \u0111\u1EC3 ch\u1ECDn Liquid Glass trong hay pha m\xE0u tr\xEAn to\xE0n h\u1EC7 th\u1ED1ng. \u0110i\u1EC3m gi\u1EEFa l\xE0 m\u1EB7c \u0111\u1ECBnh.|Drag the slider to choose how clear or tinted Liquid Glass looks across the system. The middle is the default."))])
           );
           requestAnimationFrame(() => Promise.resolve().then(() => (init_glass(), glass_exports)).then((g2) => g2.registerGlass(demo.firstChild)));
         };
@@ -2996,7 +3615,7 @@
             grid.append(h("button.wtile.add", { on: { click: () => f.click() } }, "+ Photo"), f);
           };
           draw();
-          sub("Wallpaper", grid, group([cell({ title: "Compact Lock Screen Clock", right: toggle(sys.get("compactClock"), (v) => sys.set("compactClock", v)) })], "New in iOS 27: a smaller clock so more of your wallpaper shows."));
+          sub(t("Wallpaper"), grid, group([cell({ title: "Compact Lock Screen Clock", right: toggle(sys.get("compactClock"), (v) => sys.set("compactClock", v)) })], "New in iOS 27: a smaller clock so more of your wallpaper shows."));
         };
         const colorPage = () => {
           const sw2 = h("div.cgrid");
@@ -3005,45 +3624,84 @@
             [["black", "#2b2b2f"], ["silver", "#d8d8dd"], ["glacier", "#a7bfd4"], ["burgundy", "#6b2236"]].forEach(([id, c]) => sw2.append(h("button.csw" + (sys.get("color") === id ? ".on" : ""), { on: { click: () => (sys.set("color", id), draw()) } }, h("i", { style: { background: c } }), h("span", id[0].toUpperCase() + id.slice(1)))));
           };
           draw();
-          sub("Device Color", sw2);
+          sub(t("Device Color"), sw2);
         };
         const soundsPage = () => {
-          const t = toggle(sys.get("silent"), (v) => sys.set("silent", v));
-          sys.on("silent", (v) => t.set(v), false);
-          sub("Sounds & Haptics", group([cell({ title: "Silent Mode", right: t })]), group([cell({ title: "Ringer and Alerts" }), h("div.pad", slider(sys.get("volume"), (v) => {
+          const t2 = toggle(sys.get("silent"), (v) => sys.set("silent", v));
+          sys.on("silent", (v) => t2.set(v), false);
+          sub(t2("Sounds & Haptics"), group([cell({ title: t2("Silent Mode"), right: t2 })]), group([cell({ title: "Ringer and Alerts" }), h("div.pad", slider(sys.get("volume"), (v) => {
             sys.set("volume", v);
             ctx.mod.showVolume();
-          }))]), group([cell({ title: "UI Sounds", right: toggle(sys.get("sounds"), (v) => sys.set("sounds", v)) })]));
+          }))]), group([cell({ title: t2("UI Sounds"), right: toggle(sys.get("sounds"), (v) => sys.set("sounds", v)) })]));
         };
-        const root0 = page({ title: "Settings" });
+        const langPage = () => sub(t("Language"), group(LOCALES.map(([id, name]) => cell({ title: name, detail: id === locale ? "\u2713" : "", onClick: () => setLocale(id) }))));
+        const generalPage = () => sub(t("General"), group([cell({ title: t("About"), chev: true, onClick: aboutPage }), cell({ title: t("Language & Region"), detail: LOCALES.find((l) => l[0] === locale)[1], chev: true, onClick: langPage }), cell({ title: t("Software Update"), detail: "iOS 27.0", chev: true })]));
+        const row = ([lab2, k, a]) => {
+          const title = T3(lab2);
+          if (k === "t") {
+            const tg = toggle(!!sys.get(a), (v) => sys.set(a, v));
+            return cell({ title, right: tg });
+          }
+          if (k === "d") return cell({ title, detail: T3(a) });
+          return cell({ title, chev: true });
+        };
+        const stub = (title, key) => () => sub(title, ...SP[key].map((g2) => group(g2.map(row))));
+        const siriPage = () => {
+          const seg = segmented([["27", "iOS 27"], ["26", "iOS 26"]], sys.get("siriStyle"), (v) => sys.set("siriStyle", v));
+          sub("Siri", group([cell({ title: T3("Ki\u1EC3u giao di\u1EC7n Siri|Siri Appearance"), right: seg })], T3("iOS 27: vi\xEAn s\xE1ng n\u1EDF ra t\u1EEB Dynamic Island. iOS 26: v\u1EA7ng s\xE1ng ch\u1EA1y quanh vi\u1EC1n m\xE0n h\xECnh.|iOS 27: a glowing orb grows from the Dynamic Island. iOS 26: a glow runs around the screen edge.")), group([cell({ title: T3("Xem th\u1EED|Preview"), chev: true, onClick: () => ctx.mod.siri.start() })]), ...SP.siri.map((g2) => group(g2.map(row))));
+        };
+        const R2 = (icon, color, lab2, key, fn, extra) => cell({ icon: I22[icon] || I2[icon], color, title: T3(lab2), chev: true, onClick: fn || stub(T3(lab2), key), ...extra });
+        const root0 = page({ title: t("Settings") });
         const air = toggle(sys.get("airplane"), (v) => {
           sys.set("airplane", v);
           if (v) ["wifi", "bt", "cellular"].forEach((k) => sys.set(k, false));
         });
         sys.on("airplane", (v) => air.set(v), false);
+        const sbar = h("div.sbar", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "26" }, [h("span", { html: ICO2.search }), h("input", { placeholder: t("Search"), "data-kb": "", inputmode: "none" }), h("span", { html: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>' })]);
+        const norm2 = (x) => x.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
+        sbar.querySelector("input").addEventListener("input", (e) => {
+          const q = norm2(e.target.value.trim());
+          root0.scroll.querySelectorAll(".cell").forEach((c) => c.style.display = !q || norm2(c.textContent).includes(q) ? "" : "none");
+          root0.scroll.querySelectorAll(".grp").forEach((g2) => g2.style.display = [...g2.querySelectorAll(".cell")].some((c) => c.style.display !== "none") ? "" : "none");
+        });
         root0.scroll.append(
-          h("div.field", [h("span", { html: ICO2.search }), h("input", { placeholder: "Search", "data-kb": "", inputmode: "none" })]),
-          group([cell({ icon: `<b style="font-size:17px">D</b>`, color: "linear-gradient(135deg,#7b5cff,#ff4fa3)", title: "Dat514", sub: "Apple Account, iCloud+, Media & Purchases", chev: true })]),
+          group([cell({ icon: I22.upd, color: "#8e8e93", title: T3("C\xF3 b\u1EA3n c\u1EADp nh\u1EADt ph\u1EA7n m\u1EC1m|Software Update Available"), right: h("span.badge", "1"), chev: true, onClick: stub(T3("C\u1EADp nh\u1EADt ph\u1EA7n m\u1EC1m|Software Update"), "upd") })]),
           group([
-            cell({ icon: I2.air, color: "#ff9f0a", title: "Airplane Mode", right: air }),
-            cell({ icon: I2.wifi, color: "#0a84ff", title: "Wi-Fi", detail: sys.get("wifi") ? "Home Network" : "Off", chev: true, onClick: wifiPage }),
-            cell({ icon: I2.bt, color: "#0a84ff", title: "Bluetooth", detail: sys.get("bt") ? "On" : "Off", chev: true }),
-            cell({ icon: I2.cell, color: "#30d158", title: "Cellular", chev: true })
+            cell({ icon: I2.air, color: "#ff9f0a", title: t("Airplane Mode"), right: air }),
+            cell({ icon: I2.wifi, color: "#0a84ff", title: t("Wi-Fi"), detail: sys.get("wifi") ? "Cau Hai kho tinh" : T3("T\u1EAFt|Off"), chev: true, onClick: wifiPage }),
+            R2("bt", "#0a84ff", "Bluetooth", "bt", null, { detail: sys.get("bt") ? T3("B\u1EADt|On") : T3("Kh\xF4ng \u0111\u01B0\u1EE3c k\u1EBFt n\u1ED1i|Not Connected") }),
+            R2("cell", "#30d158", "Di \u0111\u1ED9ng|Cellular", "cell", null, { detail: sys.get("cellular") ? T3("B\u1EADt|On") : T3("T\u1EAFt|Off") }),
+            R2("link", "#30d158", "\u0110i\u1EC3m truy c\u1EADp c\xE1 nh\xE2n|Personal Hotspot", "hot", null, { detail: T3("T\u1EAFt|Off") }),
+            R2("batt", "#30d158", "Pin|Battery", "batt"),
+            R2("vpn", "#0a84ff", "VPN", "vpn", null, { detail: T3("Kh\xF4ng \u0111\u01B0\u1EE3c k\u1EBFt n\u1ED1i|Not Connected") })
           ]),
           group([
-            cell({ icon: I2.bell, color: "#ff3b30", title: "Notifications", chev: true }),
-            cell({ icon: I2.snd, color: "#ff2d55", title: "Sounds & Haptics", chev: true, onClick: soundsPage }),
-            cell({ icon: I2.moon, color: "#5e5ce6", title: "Focus", chev: true })
+            R2("gear", "#8e8e93", "C\xE0i \u0111\u1EB7t chung|General", "gen", generalPage),
+            R2("acc", "#0a84ff", "Tr\u1EE3 n\u0103ng|Accessibility", "acc"),
+            R2("cam", "#8e8e93", "Camera", "cam"),
+            R2("stby", "#1c1c1e", "Ch\u1EBF \u0111\u1ED9 ch\u1EDD|StandBy", "stby"),
+            R2("appr", "#1c1c1e", "Giao di\u1EC7n|Appearance", "app", appearancePage),
+            R2("wall", "#30b0c7", "H\xECnh n\u1EC1n|Wallpaper", "wall", wallpaperPage),
+            R2("sun", "#0a84ff", "M\xE0n h\xECnh & \u0110\u1ED9 s\xE1ng|Display & Brightness", "disp", displayPage),
+            R2("home", "#0a84ff", "M\xE0n h\xECnh ch\xEDnh & Th\u01B0 vi\u1EC7n \u1EE9ng d\u1EE5ng|Home Screen & App Library", "hs"),
+            R2("siri", "#5e5ce6", "Siri", "siri", siriPage),
+            R2("srch", "#8e8e93", "T\xECm ki\u1EBFm|Search", "srch"),
+            R2("sw", "#636366", "Trung t\xE2m \u0111i\u1EC1u khi\u1EC3n|Control Center", "cc")
           ]),
           group([
-            cell({ icon: I2.gear, color: "#8e8e93", title: "General", chev: true, onClick: () => sub("General", group([cell({ title: "About", chev: true, onClick: aboutPage }), cell({ title: "Software Update", detail: "iOS 27.0", chev: true })])) }),
-            cell({ icon: I2.sw, color: "#636366", title: "Control Center", chev: true }),
-            cell({ icon: I2.sun, color: "#0a84ff", title: "Display & Brightness", chev: true, onClick: displayPage }),
-            cell({ icon: I2.home, color: "#5e5ce6", title: "Home Screen & App Library", chev: true }),
-            cell({ icon: I2.wall, color: "#30b0c7", title: "Wallpaper", chev: true, onClick: wallpaperPage })
+            R2("bell", "#ff3b30", "Th\xF4ng b\xE1o|Notifications", "notif"),
+            R2("snd", "#ff2d55", "\xC2m thanh & C\u1EA3m \u1EE9ng|Sounds & Haptics", "snd", soundsPage),
+            R2("moon", "#5e5ce6", "T\u1EADp trung|Focus", "focus"),
+            R2("hour", "#5e5ce6", "Th\u1EDDi gian s\u1EED d\u1EE5ng|Screen Time", "sct")
           ]),
-          group([cell({ icon: I2.phone, color: "#1c1c1e", title: "Device Color", detail: sys.get("color"), chev: true, onClick: colorPage })], "Simulator option: change the finish of the virtual iPhone 18 Pro Max.")
+          group([R2("face", "#30d158", "Face ID & M\u1EADt m\xE3|Face ID & Passcode", "fid"), R2("sos", "#ff3b30", "SOS kh\u1EA9n c\u1EA5p|Emergency SOS", "sos"), R2("hand", "#0a84ff", "Quy\u1EC1n ri\xEAng t\u01B0 & B\u1EA3o m\u1EADt|Privacy & Security", "priv")]),
+          group([R2("game", "#ff2d55", "Game Center", "game"), R2("cloud", "#0a84ff", "iCloud", "icloud"), R2("wlt", "#1c1c1e", "V\xED & Apple Pay|Wallet & Apple Pay", "wlt")]),
+          group([R2("home", "#5e5ce6", "\u1EE8ng d\u1EE5ng|Apps", "apps")]),
+          group([cell({ icon: I2.phone, color: "#1c1c1e", title: t("Device Color"), detail: sys.get("color"), chev: true, onClick: colorPage })], T3("Tu\u1EF3 ch\u1ECDn c\u1EE7a simulator: \u0111\u1ED5i m\xE0u m\xE1y \u1EA3o.|Simulator option: change the finish of the virtual iPhone."))
         );
+        root0.scroll.style.paddingBottom = "120px";
+        root0.el.append(sbar);
+        requestAnimationFrame(() => registerGlass(sbar));
         nav.push(root0.el);
         root0.el.classList.remove("pushed");
       }
@@ -3072,9 +3730,9 @@
           return f != null && /^\d+$/.test(f) && Math.abs(n) < 1e15 ? Number(i).toLocaleString("en") + "." + f : Math.abs(n) >= 1e9 || Math.abs(n) < 1e-6 && n ? n.toExponential(4) : n.toLocaleString("en", { maximumFractionDigits: 8 });
         };
         const show = () => {
-          const t = fmt(cur);
-          disp.textContent = t;
-          disp.style.fontSize = Math.max(44, 96 - Math.max(0, t.length - 6) * 9) + "px";
+          const t2 = fmt(cur);
+          disp.textContent = t2;
+          disp.style.fontSize = Math.max(44, 96 - Math.max(0, t2.length - 6) * 9) + "px";
           grid.querySelector('[data-k="AC"]').textContent = cur !== "0" || !fresh && prev == null ? "C" : "AC";
           grid.querySelectorAll(".op").forEach((b) => b.classList.toggle("hot", b.dataset.k === hot));
         };
@@ -3146,10 +3804,10 @@
           const base = -now.getTimezoneOffset();
           wlist.innerHTML = "";
           CITIES.forEach(([n, tz]) => {
-            const t = now.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
+            const t2 = now.toLocaleTimeString("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit" });
             const off = new Date(now.toLocaleString("en-US", { timeZone: tz }));
             const d = Math.round((off - new Date(now.toLocaleString("en-US"))) / 36e5);
-            wlist.append(h("div.wrow", [h("div", [h("small", d === 0 ? "Today, +0HRS" : `Today, ${d > 0 ? "+" : ""}${d}HRS`), h("b", n)]), h("span", t)]));
+            wlist.append(h("div.wrow", [h("div", [h("small", d === 0 ? "Today, +0HRS" : `Today, ${d > 0 ? "+" : ""}${d}HRS`), h("b", n)]), h("span", t2)]));
           });
         };
         let swStart = 0, swAcc = 0, swRun = false, laps = [], raf2 = 0;
@@ -3368,7 +4026,7 @@
           }
         }
         function stop() {
-          stream?.getTracks().forEach((t) => t.stop());
+          stream?.getTracks().forEach((t2) => t2.stop());
           stream = null;
           app.classList.remove("live");
         }
@@ -3420,8 +4078,8 @@
         const paint = () => {
           grid.innerHTML = "";
           all().forEach((it, i) => {
-            const t = h("button.pth", { style: it.src ? { background: `center / cover url(${it.src})` } : { background: it.bg }, on: { click: () => openViewer(it, t) } });
-            grid.append(t);
+            const t2 = h("button.pth", { style: it.src ? { background: `center / cover url(${it.src})` } : { background: it.bg }, on: { click: () => openViewer(it, t2) } });
+            grid.append(t2);
           });
         };
         function openViewer(it, thumb) {
@@ -3524,25 +4182,25 @@
         const DUR = 180;
         const song = () => SONGS[i];
         const midi = (n) => 440 * Math.pow(2, (n - 69) / 12);
-        const note = (f, t, d, type, v) => {
+        const note2 = (f, t2, d, type, v) => {
           const o = ac2.createOscillator(), g2 = ac2.createGain();
           o.type = type;
           o.frequency.value = f;
-          g2.gain.setValueAtTime(1e-4, t);
-          g2.gain.linearRampToValueAtTime(v, t + Math.min(0.08, d / 3));
-          g2.gain.exponentialRampToValueAtTime(1e-4, t + d);
+          g2.gain.setValueAtTime(1e-4, t2);
+          g2.gain.linearRampToValueAtTime(v, t2 + Math.min(0.08, d / 3));
+          g2.gain.exponentialRampToValueAtTime(1e-4, t2 + d);
           o.connect(g2).connect(master);
-          o.start(t);
-          o.stop(t + d + 0.05);
+          o.start(t2);
+          o.stop(t2 + d + 0.05);
         };
         const sched = () => {
           const s = song();
           const beat = 60 / s.bpm;
           while (nextT < ac2.currentTime + 0.25) {
             const bar = Math.floor(step / 4) % s.prog.length, ch = s.prog[bar], b = step % 4;
-            if (b === 0) ch.forEach((n, k) => note(midi(s.root + n - 12), nextT, beat * 4.2, "sine", 0.1 - k * 0.012));
-            note(midi(s.root + 12 + ch[(step * 3 + (step >> 2)) % ch.length]), nextT, beat * 0.9, "triangle", 0.09);
-            if (b % 2 === 0) note(midi(s.root - 12 + ch[0]), nextT, beat * 0.5, "sine", 0.13);
+            if (b === 0) ch.forEach((n, k) => note2(midi(s.root + n - 12), nextT, beat * 4.2, "sine", 0.1 - k * 0.012));
+            note2(midi(s.root + 12 + ch[(step * 3 + (step >> 2)) % ch.length]), nextT, beat * 0.9, "triangle", 0.09);
+            if (b % 2 === 0) note2(midi(s.root - 12 + ch[0]), nextT, beat * 0.5, "sine", 0.13);
             nextT += beat / 2 * 2 / 2 * 1;
             step++;
           }
@@ -3728,15 +4386,15 @@
             }, 900 + Math.random() * 600);
           };
           const doSend = () => {
-            const t = input.value.trim();
-            if (!t) return;
+            const t2 = input.value.trim();
+            if (!t2) return;
             input.value = "";
-            const m = { me: 1, text: t };
+            const m = { me: 1, text: t2 };
             c.msgs.push(m);
             save();
             add(m, true);
             sfx.tap();
-            reply(t);
+            reply(t2);
           };
           send.addEventListener("click", doSend);
           input.addEventListener("keydown", (e) => e.key === "Enter" && doSend());
@@ -3757,7 +4415,7 @@
       name: "Phone",
       status: "auto",
       build(root) {
-        const app = h("div.app.phone");
+        const app = h("div.app.dialer");
         root.append(app);
         let num = "";
         const out = h("div.pnum");
@@ -3780,12 +4438,25 @@
         grid.append(h("span"), call, del);
         const paint = () => out.textContent = num.replace(/(\d{4})(\d{3})(\d{0,4})/, "$1 $2 $3").trim();
         del.addEventListener("click", () => (num = num.slice(0, -1), paint()));
+        const IC = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+        const PEOPLE = [["M\u1EB9", "0903 111 222"], ["Ba", "0912 333 444"], ["Dat514", "0987 654 321"], ["Minh", "0935 777 888"], ["Lan", "0966 123 456"], ["Viettel", "198"]];
+        const row = (n, sub, right) => h("div.cell.tap", { on: { click: () => startCall(n) } }, [h("span.av", { style: { background: "linear-gradient(135deg,#7b5cff,#ff4fa3)" } }, n[0]), h("span.ct", { html: `<b>${n}</b><em>${sub}</em>` }), h("span.det", right || "")]);
+        const list = (title, rows) => h("div.plist", [h("h1.lt", title), h("div.grp", rows)]);
+        const views = {
+          k: h("div.pwrap", [out, grid]),
+          r: list(t("Calls"), PEOPLE.slice(0, 5).map(([n], i) => row(n, i % 3 === 1 ? t("Missed") : t("Outgoing"), `${i + 1}h`))),
+          c: list(t("Contacts"), PEOPLE.map(([n, p]) => row(n, p)))
+        };
+        const show = (id) => Object.entries(views).forEach(([k, v]) => v.style.display = k === id ? "" : "none");
         const tabs = tabBar([
-          { id: "f", icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.700 5.600 6.100.9-4.400 4.300 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/></svg>`, label: "Favorites" },
-          { id: "r", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`, label: "Recents" },
-          { id: "k", icon: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>`, label: "Keypad" }
-        ], "k", () => tabs.select("k", true));
-        app.append(h("div.pwrap", [out, grid]), tabs);
+          { id: "r", icon: IC('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'), label: t("Calls") },
+          { id: "c", icon: IC('<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>'), label: t("Contacts") },
+          { id: "k", icon: `<svg viewBox="0 0 24 24" fill="currentColor">${[5, 12, 19].flatMap((y) => [6, 12, 18].map((x) => `<circle cx="${x}" cy="${y}" r="2"/>`)).join("")}</svg>`, label: t("Keypad") }
+        ], "k", show);
+        const search = h("button.psearch", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "33", html: ICO2.search });
+        requestAnimationFrame(() => registerGlass(search));
+        app.append(views.k, views.r, views.c, tabs, search);
+        show("k");
         const scr = h("div.callscr");
         let tm = 0;
         const end = () => {
@@ -3794,9 +4465,8 @@
           ctx.mod.island.update("call", null);
         };
         ctx.mod.phone = { hangup: end };
-        call.addEventListener("click", () => {
-          const name = num || "Unknown";
-          scr.innerHTML = `<div class="cav">${name[0]}</div><h2>${name}</h2><p class="cst">calling\u2026</p><div class="cgr">${["mute", "keypad", "speaker", "add call", "FaceTime", "contacts"].map((x) => `<span><i></i>${x}</span>`).join("")}</div><button class="cend"><svg viewBox="0 0 24 24" width="36" height="36" fill="#fff" style="rotate:135deg"><path d="M6.600 10.800a15.100 15.100 0 0 0 6.600 6.600l2.200-2.200a1 1 0 0 1 1-.25 11.400 11.400 0 0 0 3.600.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.500a1 1 0 0 1 1 1c0 1.250.2 2.450.57 3.600a1 1 0 0 1-.25 1z"/></svg></button>`;
+        const startCall = (name) => {
+          scr.innerHTML = `<div class="cav">${name[0]}</div><h2>${name}</h2><p class="cst">${t("calling\u2026")}</p><div class="cgr">${["mute", "keypad", "speaker", "add call", "FaceTime", "contacts"].map((x) => `<span><i></i>${x}</span>`).join("")}</div><button class="cend"><svg viewBox="0 0 24 24" width="36" height="36" fill="#fff" style="rotate:135deg"><path d="M6.600 10.800a15.100 15.100 0 0 0 6.600 6.600l2.200-2.200a1 1 0 0 1 1-.25 11.400 11.400 0 0 0 3.600.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.500a1 1 0 0 1 1 1c0 1.250.2 2.450.57 3.600a1 1 0 0 1-.25 1z"/></svg></button>`;
           scr.querySelector(".cend").addEventListener("click", end);
           scr.classList.add("on");
           setTimeout(() => {
@@ -3809,7 +4479,8 @@
             }, 500);
             ctx.mod.island.update("call", { name, start });
           }, 1800);
-        });
+        };
+        call.addEventListener("click", () => startCall(num || t("Unknown")));
         app.append(scr);
       }
     });
@@ -3825,10 +4496,10 @@
         root.append(app);
         const start = h("div.sstart", [h("h1.lt", "Favorites"), h("div.favs", FAV.map(([n, u, c, l]) => h("button.fav", { on: { click: () => go(u) } }, [h("i", { style: { background: c, color: c === "#fff" ? "#000" : "#fff" } }, l), h("span", n)])))]);
         const frame2 = h("iframe.sframe", { referrerpolicy: "no-referrer", sandbox: "allow-scripts allow-same-origin allow-forms allow-popups" });
-        const note = h("div.snote", ["Some sites can\u2019t be shown inside a simulator. ", h("button", { on: { click: () => window.open(cur, "_blank") } }, "Open in browser")]);
+        const note2 = h("div.snote", ["Some sites can\u2019t be shown inside a simulator. ", h("button", { on: { click: () => window.open(cur, "_blank") } }, "Open in browser")]);
         const input = h("input", { "data-kb": "", inputmode: "none", placeholder: "Search or enter website name", autocomplete: "off" });
         const bar = h("div.sbar", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "28" }, [h("span", { html: ICO2.search }), input]);
-        app.append(start, frame2, note, bar);
+        app.append(start, frame2, note2, bar);
         requestAnimationFrame(() => registerGlass(bar));
         let cur = "";
         function go(raw) {
@@ -3927,8 +4598,183 @@
     });
   }
 
+  // js/apps/appstore.js
+  init_glass();
+  var T4 = (s) => {
+    const [vi, en] = s.split("|");
+    return locale === "vi" ? vi : en || vi;
+  };
+  var tk = (c, tr) => `<path d="M33 16v23a8.500 8.500 0 1 1-8.500-8.500M33 16c.8 5.500 4 8.500 9.500 9" stroke="${c}" transform="${tr}"/>`;
+  ICONS.tiktok = ["#000", `<svg viewBox="0 0 62 62" fill="none" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${tk("#25f4ee", "translate(-1.800 -1.800)")}${tk("#fe2c55", "translate(1.800 1.800)")}${tk("#fff", "")}</svg>`];
+  var AppStore = {
+    items: [],
+    progress: {},
+    pending: null,
+    isInstalled: (id) => store.get("installed", []).includes(id),
+    register(item) {
+      this.items.push(item);
+      const cloud = !this.isInstalled(item.id);
+      if (APPS[item.id]) return Object.assign(APPS[item.id], { installable: true, cloud });
+      registerApp({ id: item.id, name: item.name, status: "dark", bg: "#000", installable: true, cloud, build: item.build });
+    }
+  };
+  AppStore.register({
+    id: "tiktok",
+    name: "TikTok",
+    subtitle: "Video ng\u1EAFn, nhi\u1EC1u c\u1EA3m h\u1EE9ng|Make Your Day",
+    category: "social",
+    rating: "4,8 \u2605 \xB7 12+",
+    desc: "Kh\xE1m ph\xE1 nh\u1EEFng video ng\u1EAFn th\xFA v\u1ECB t\u1EEB kh\u1EAFp n\u01A1i tr\xEAn th\u1EBF gi\u1EDBi.|Discover short, entertaining videos from around the world.",
+    build(root) {
+      root.append(h("div.app.tkph", { html: `<div class="tkl">${iconHTML("tiktok", "TikTok")}</div><h2>TikTok</h2><p>${T4("Tr\xECnh ph\xE1t video s\u1EBD \u0111\u01B0\u1EE3c th\xEAm \u1EDF b\u01B0\u1EDBc sau.|The video player arrives in a later build.")}</p>` }));
+    }
+  });
+  var stateOf = (id) => id in AppStore.progress ? "busy" : AppStore.isInstalled(id) ? "open" : AppStore.pending === id ? "install" : "get";
+  var LABEL = { get: "Nh\u1EADn|Get", install: "C\xE0i \u0111\u1EB7t|Install", open: "M\u1EDF|Open", busy: "" };
+  function initAppStore() {
+    registerApp({
+      id: "appstore",
+      name: "App Store",
+      status: "auto",
+      bg: "var(--bg2)",
+      build(root) {
+        const app = h("div.app.store");
+        root.append(app);
+        const btns = [];
+        const getBtn = (item) => {
+          const b = h("button.getb", { "data-id": item.id });
+          b.addEventListener("click", (e) => {
+            e.stopPropagation();
+            press(item.id);
+          });
+          btns.push(b);
+          paint(b);
+          return b;
+        };
+        const paint = (b) => {
+          const s = stateOf(b.dataset.id);
+          b.className = "getb " + s;
+          b.textContent = T4(LABEL[s]);
+          b.style.setProperty("--p", ((AppStore.progress[b.dataset.id] || 0) * 100).toFixed(1));
+        };
+        const refresh = () => btns.forEach(paint);
+        const row = (it) => h("div.srow", { on: { click: () => detail(it) } }, [h("div.sic", { html: iconHTML(it.id, it.name) }), h("div.stx", { html: `<b>${it.name}</b><em>${T4(it.subtitle)}</em>` }), getBtn(it)]);
+        const card = (it) => h("div.scard", { on: { click: () => detail(it) } }, [h("div.sct", { html: `<em>${T4("App c\u1EE7a ng\xE0y|App of the Day")}</em><b>${it.name}</b><span>${T4(it.subtitle)}</span>` }), h("div.scb", [h("div.sic", { html: iconHTML(it.id, it.name) }), h("div.stx", { html: `<b>${it.name}</b>` }), getBtn(it)])]);
+        const views = {
+          today: h("div.sview", [h("h1.lt", T4("H\xF4m nay|Today")), ...AppStore.items.map(card)]),
+          apps: h("div.sview", [h("h1.lt", T4("\u1EE8ng d\u1EE5ng|Apps")), h("div.grp", AppStore.items.map(row))]),
+          search: h("div.sview", [h("h1.lt", T4("T\xECm ki\u1EBFm|Search")), h("input.sin", { placeholder: T4("Tr\xF2 ch\u01A1i, \u1EE8ng d\u1EE5ng, C\xE2u chuy\u1EC7n|Games, Apps, Stories"), "data-kb": "", inputmode: "none" }), h("div.grp", AppStore.items.map(row))])
+        };
+        const show = (id) => Object.entries(views).forEach(([k, v]) => v.style.display = k === id ? "" : "none");
+        const IC = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+        const tabs = tabBar([
+          { id: "today", icon: IC('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h5"/>'), label: T4("H\xF4m nay|Today") },
+          { id: "apps", icon: IC('<path d="M12 3l9 5-9 5-9-5zM3 12l9 5 9-5"/>'), label: T4("\u1EE8ng d\u1EE5ng|Apps") },
+          { id: "search", icon: IC('<circle cx="11" cy="11" r="6.500"/><path d="M16 16l4.500 4.500"/>'), label: T4("T\xECm ki\u1EBFm|Search") }
+        ], "today", show);
+        app.append(...Object.values(views), tabs);
+        show("today");
+        function detail(it) {
+          const back = h("button.sback", { html: "\u2039 " + T4("Quay l\u1EA1i|Back"), on: { click: () => {
+            d.classList.remove("in");
+            setTimeout(() => d.remove(), 350);
+          } } });
+          const d = h("div.sdet", [back, h("div.shead", [h("div.sic.big", { html: iconHTML(it.id, it.name) }), h("div.stx", { html: `<b>${it.name}</b><em>${T4(it.subtitle)}</em>` })]), h("div.sact", [getBtn(it), h("span", it.rating)]), h("div.shots", [1, 2, 3].map((i) => h("i", { style: { background: `linear-gradient(${150 + i * 40}deg,#25f4ee33,#fe2c5555)` } }))), h("p.sdesc", T4(it.desc))]);
+          app.append(d);
+          requestAnimationFrame(() => d.classList.add("in"));
+        }
+        ctx.mod.appstore = { refresh, confirm: () => confirm(), get pending() {
+          return AppStore.pending;
+        } };
+      }
+    });
+    const ov = h("div.dbl", [h("div.dbl-bar"), h("div.dbl-card", { html: `<svg viewBox="0 0 24 24" fill="none" stroke="#0a84ff" stroke-width="1.800" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M9 10v1.500M15 10v1.500M12 10v4h-1M9.500 16.500c1.500 1 3.500 1 5 0"/></svg><b>${T4("Nh\u1EA5n \u0111\xFAp \u0111\u1EC3 c\xE0i \u0111\u1EB7t|Double Click to Install")}</b>` })]);
+    let last2 = 0, pwEl = null;
+    const refreshAll = () => ctx.mod.appstore?.refresh();
+    function press(id) {
+      if (stateOf(id) === "open") return ctx.mod.wm.open(id);
+      if (stateOf(id) === "busy") return;
+      AppStore.pending = id;
+      refreshAll();
+      if (!ov.isConnected) ctx.screen.append(ov);
+      const s = ctx.screen.getBoundingClientRect(), k = s.width / 440, r = pwEl?.getBoundingClientRect();
+      ov.querySelector(".dbl-bar").style.top = (r ? (r.top - s.top) / k : 200) + "px";
+      ov.querySelector(".dbl-bar").style.height = (r ? r.height / k : 90) + "px";
+      pwEl?.classList.add("hw-glow");
+      requestAnimationFrame(() => ov.classList.add("on"));
+    }
+    function cancel() {
+      AppStore.pending = null;
+      ov.classList.remove("on");
+      pwEl?.classList.remove("hw-glow");
+      refreshAll();
+    }
+    async function confirm() {
+      const id = AppStore.pending;
+      if (!id) return;
+      ov.classList.remove("on");
+      pwEl?.classList.remove("hw-glow");
+      const ok = !sys.get("faceidFail");
+      await ctx.mod.island.faceID(ok);
+      if (!ok) {
+        ctx.mod.island.alert(`<b>${T4("Nh\u1EADp m\u1EADt m\xE3\u2026|Enter Passcode\u2026")}</b>`, "faceid", 1500);
+        await new Promise((r) => setTimeout(r, 1700));
+      }
+      AppStore.pending = null;
+      install(id);
+    }
+    function install(id) {
+      AppStore.progress[id] = 0;
+      refreshAll();
+      ctx.mod.home.addApp(id, { installing: true });
+      const dur = 2500 + Math.random() * 3e3, t0 = performance.now();
+      const tick = () => {
+        const p = Math.min(1, (performance.now() - t0) / dur);
+        AppStore.progress[id] = p;
+        ctx.mod.home.setInstall(id, p, T4(p < 0.12 ? "\u0110ang ch\u1EDD\u2026|Waiting\u2026" : p < 0.85 ? "\u0110ang t\u1EA3i\u2026|Downloading\u2026" : "\u0110ang c\xE0i \u0111\u1EB7t\u2026|Installing\u2026"));
+        refreshAll();
+        if (p < 1) return requestAnimationFrame(tick);
+        delete AppStore.progress[id];
+        store.set("installed", [.../* @__PURE__ */ new Set([...store.get("installed", []), id])]);
+        APPS[id].cloud = false;
+        ctx.mod.home.finishInstall(id);
+        refreshAll();
+      };
+      requestAnimationFrame(tick);
+    }
+    AppStore.uninstall = (id) => {
+      store.set("installed", store.get("installed", []).filter((x) => x !== id));
+      APPS[id].cloud = true;
+      refreshAll();
+    };
+    const tap = () => {
+      const n = performance.now();
+      if (n - last2 < 500) {
+        last2 = 0;
+        confirm();
+      } else last2 = n;
+    };
+    requestAnimationFrame(() => {
+      pwEl = ctx.phone.querySelector('[data-hw="power"]');
+      pwEl?.addEventListener("click", (e) => {
+        if (AppStore.pending) {
+          e.stopImmediatePropagation();
+          tap();
+        }
+      }, true);
+    });
+    ov.addEventListener("click", (e) => {
+      if (e.target.closest(".dbl-bar")) tap();
+      else cancel();
+    });
+    addEventListener("keyup", (e) => {
+      if (e.key === "Shift" && AppStore.pending) tap();
+      else if (e.key === "Escape" && AppStore.pending) cancel();
+    });
+  }
+
   // js/apps/all.js
-  var APP_INITS = [initSettings, initCalculator, initClock, initNotes, initCamera, initPhotos, initMusic, initMessages, initPhone, initSafari, initCalendar, initWeather];
+  var APP_INITS = [initSettings, initCalculator, initClock, initNotes, initCamera, initPhotos, initMusic, initMessages, initPhone, initSafari, initCalendar, initWeather, initAppStore];
 
   // js/main.js
   sys.init({
@@ -3949,7 +4795,13 @@
     flash: false,
     lowpower: false,
     sounds: true,
-    compactClock: false
+    compactClock: false,
+    at: true,
+    atTap: "menu",
+    atDouble: "home",
+    atLong: "siri",
+    atItems: ["img", "music", "rotate", "rotlock", "silent", "translate"],
+    siriStyle: "27"
   });
   sys.set("flash", false, false);
   async function boot() {
@@ -3968,6 +4820,8 @@
     initKeyboard();
     initPower();
     initGestures();
+    initAssistive();
+    initSiri();
     ctx.mod.canHome = () => wm.mode === "home" && !ctx.mod.lock.shown && !ctx.mod.cc.open && !ctx.mod.spot.open && ctx.mod.power.on;
     initGlass();
     ctx.mod.setStatusTone("light");
@@ -3983,5 +4837,6 @@
     };
     window.__ios = ctx;
   }
+  console.info(`iOS ${VERSION.ios} Simulator v${VERSION.simulator} \xB7 ${VERSION.device} \xB7 ${VERSION.build}`);
   boot();
 })();

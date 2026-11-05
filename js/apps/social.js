@@ -4,6 +4,7 @@ import { page, btn, ICO, NavStack, tabBar, cell, group } from "../core/ui.js";
 import { ctx } from "../core/ctx.js";
 import { registerGlass } from "../glass.js";
 import { sfx } from "../core/audio.js";
+import { t } from "../core/i18n.js";
 
 /* =============================== Messages =============================== */
 const CONVOS = [
@@ -90,7 +91,7 @@ export function initPhone() {
     registerApp({
         id: "phone", name: "Phone", status: "auto",
         build(root) {
-            const app = h("div.app.phone");
+            const app = h("div.app.dialer");
             root.append(app);
             let num = "";
             const out = h("div.pnum");
@@ -107,20 +108,32 @@ export function initPhone() {
             grid.append(h("span"), call, del);
             const paint = () => (out.textContent = num.replace(/(\d{4})(\d{3})(\d{0,4})/, "$1 $2 $3").trim());
             del.addEventListener("click", () => ((num = num.slice(0, -1)), paint()));
+            const IC = (d) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+            const PEOPLE = [["Mẹ", "0903 111 222"], ["Ba", "0912 333 444"], ["Dat514", "0987 654 321"], ["Minh", "0935 777 888"], ["Lan", "0966 123 456"], ["Viettel", "198"]];
+            const row = (n, sub, right) => h("div.cell.tap", { on: { click: () => startCall(n) } }, [h("span.av", { style: { background: "linear-gradient(135deg,#7b5cff,#ff4fa3)" } }, n[0]), h("span.ct", { html: `<b>${n}</b><em>${sub}</em>` }), h("span.det", right || "")]);
+            const list = (title, rows) => h("div.plist", [h("h1.lt", title), h("div.grp", rows)]);
+            const views = {
+                k: h("div.pwrap", [out, grid]),
+                r: list(t("Calls"), PEOPLE.slice(0, 5).map(([n], i) => row(n, i % 3 === 1 ? t("Missed") : t("Outgoing"), `${i + 1}h`))),
+                c: list(t("Contacts"), PEOPLE.map(([n, p]) => row(n, p))),
+            };
+            const show = (id) => Object.entries(views).forEach(([k, v]) => (v.style.display = k === id ? "" : "none"));
             const tabs = tabBar([
-                { id: "f", icon: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 3 2.700 5.600 6.100.9-4.400 4.300 1 6.100L12 17l-5.400 2.900 1-6.100L3.200 9.500l6.100-.9z"/></svg>`, label: "Favorites" },
-                { id: "r", icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>`, label: "Recents" },
-                { id: "k", icon: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="6" cy="5" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="18" cy="5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="6" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>`, label: "Keypad" },
-            ], "k", () => tabs.select("k", true));
-            app.append(h("div.pwrap", [out, grid]), tabs);
+                { id: "r", icon: IC('<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'), label: t("Calls") },
+                { id: "c", icon: IC('<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>'), label: t("Contacts") },
+                { id: "k", icon: `<svg viewBox="0 0 24 24" fill="currentColor">${[5, 12, 19].flatMap((y) => [6, 12, 18].map((x) => `<circle cx="${x}" cy="${y}" r="2"/>`)).join("")}</svg>`, label: t("Keypad") },
+            ], "k", show);
+            const search = h("button.psearch", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "33", html: ICO.search });
+            requestAnimationFrame(() => registerGlass(search));
+            app.append(views.k, views.r, views.c, tabs, search);
+            show("k");
 
             const scr = h("div.callscr");
             let tm = 0;
             const end = () => { clearInterval(tm); scr.classList.remove("on"); ctx.mod.island.update("call", null); };
             ctx.mod.phone = { hangup: end };
-            call.addEventListener("click", () => {
-                const name = num || "Unknown";
-                scr.innerHTML = `<div class="cav">${name[0]}</div><h2>${name}</h2><p class="cst">calling…</p><div class="cgr">${["mute", "keypad", "speaker", "add call", "FaceTime", "contacts"].map((x) => `<span><i></i>${x}</span>`).join("")}</div><button class="cend"><svg viewBox="0 0 24 24" width="36" height="36" fill="#fff" style="rotate:135deg"><path d="M6.600 10.800a15.100 15.100 0 0 0 6.600 6.600l2.200-2.200a1 1 0 0 1 1-.25 11.400 11.400 0 0 0 3.600.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.500a1 1 0 0 1 1 1c0 1.250.2 2.450.57 3.600a1 1 0 0 1-.25 1z"/></svg></button>`;
+            const startCall = (name) => {
+                scr.innerHTML = `<div class="cav">${name[0]}</div><h2>${name}</h2><p class="cst">${t("calling…")}</p><div class="cgr">${["mute", "keypad", "speaker", "add call", "FaceTime", "contacts"].map((x) => `<span><i></i>${x}</span>`).join("")}</div><button class="cend"><svg viewBox="0 0 24 24" width="36" height="36" fill="#fff" style="rotate:135deg"><path d="M6.600 10.800a15.100 15.100 0 0 0 6.600 6.600l2.200-2.200a1 1 0 0 1 1-.25 11.400 11.400 0 0 0 3.600.57 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.500a1 1 0 0 1 1 1c0 1.250.2 2.450.57 3.600a1 1 0 0 1-.25 1z"/></svg></button>`;
                 scr.querySelector(".cend").addEventListener("click", end);
                 scr.classList.add("on");
                 setTimeout(() => {
@@ -130,7 +143,8 @@ export function initPhone() {
                     tm = setInterval(() => { const s = Math.floor((Date.now() - start) / 1000); scr.querySelector(".cst").textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }, 500);
                     ctx.mod.island.update("call", { name, start });
                 }, 1800);
-            });
+            };
+            call.addEventListener("click", () => startCall(num || t("Unknown")));
             app.append(scr);
         },
     });

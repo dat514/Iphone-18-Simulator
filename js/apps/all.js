@@ -3,5 +3,6 @@ import { initCalculator, initClock, initNotes } from "./tools.js";
 import { initCamera, initPhotos, initMusic } from "./media.js";
 import { initMessages, initPhone, initSafari } from "./social.js";
 import { initCalendar, initWeather } from "./info.js";
+import { initAppStore } from "./appstore.js";
 
-export const APP_INITS = [initSettings, initCalculator, initClock, initNotes, initCamera, initPhotos, initMusic, initMessages, initPhone, initSafari, initCalendar, initWeather];
+export const APP_INITS = [initSettings, initCalculator, initClock, initNotes, initCamera, initPhotos, initMusic, initMessages, initPhone, initSafari, initCalendar, initWeather, initAppStore];

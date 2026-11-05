@@ -1,4 +1,5 @@
 import { sys } from "./core/util.js";
+import { VERSION } from "./version.js";
 import { ctx } from "./core/ctx.js";
 import { initGlass } from "./glass.js";
 import { buildDevice } from "./system/device.js";
@@ -14,6 +15,8 @@ import { initSpotlight } from "./system/spotlight.js";
 import { initKeyboard } from "./system/keyboard.js";
 import { initGestures } from "./system/gestures.js";
 import { initPower } from "./system/power.js";
+import { initAssistive } from "./system/assistive.js";
+import { initSiri } from "./system/siri.js";
 import { registerAllApps } from "./apps/index.js";
 import { APP_INITS } from "./apps/all.js";
 
@@ -21,6 +24,7 @@ sys.init({
     theme: "light", color: "black", brightness: 1, volume: 0.5, glass: 0.35, wallpaper: "aurora", customWallpaper: null,
     airplane: false, wifi: true, bt: true, cellular: true, focus: false, rotlock: false, silent: false, flash: false,
     lowpower: false, sounds: true, compactClock: false,
+    at: true, atTap: "menu", atDouble: "home", atLong: "siri", atItems: ["img", "music", "rotate", "rotlock", "silent", "translate"], siriStyle: "27",
 });
 sys.set("flash", false, false);
 
@@ -40,6 +44,8 @@ async function boot() {
     initKeyboard();
     initPower();
     initGestures();
+    initAssistive();
+    initSiri();
     ctx.mod.canHome = () => wm.mode === "home" && !ctx.mod.lock.shown && !ctx.mod.cc.open && !ctx.mod.spot.open && ctx.mod.power.on;
     initGlass();
     ctx.mod.setStatusTone("light");
@@ -57,4 +63,5 @@ async function boot() {
     };
     window.__ios = ctx; // handy for debugging in DevTools
 }
+console.info(`iOS ${VERSION.ios} Simulator v${VERSION.simulator} · ${VERSION.device} · ${VERSION.build}`);
 boot();

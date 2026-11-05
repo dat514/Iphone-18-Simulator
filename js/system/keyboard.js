@@ -41,7 +41,7 @@ export function initKeyboard() {
             keys.append(row(N1.map((c) => key(c))), row(N2.map((c) => key(c))));
             keys.append(row([key("#+=", { v: "noop", cls: "fn" }), ...N3.map((c) => key(c)), key("", { v: "del", cls: "fn", html: '<svg viewBox="0 0 24 24" width="26" height="26"><path d="M9 5h11a1.500 1.500 0 0 1 1.500 1.500v11A1.500 1.500 0 0 1 20 19H9l-6-7z" fill="none" stroke="currentColor" stroke-width="1.800" stroke-linejoin="round"/><path d="M12.500 9.500l5 5M17.500 9.500l-5 5" stroke="currentColor" stroke-width="1.800" stroke-linecap="round"/></svg>' })], "r3 n"));
         }
-        keys.append(row([key(st.mode === "abc" ? "123" : "ABC", { v: "mode", cls: "fn" }), key("space", { v: " ", cls: "space" }), key("return", { v: "ret", cls: "fn ret" })], "r4"));
+        keys.append(row([key(st.mode === "abc" ? "123" : "ABC", { v: "mode", cls: "fn" }), key("", { v: " ", cls: "space", html: '<i class="lg">VI EN</i>' }), key("return", { v: "ret", cls: "fn ret" })], "r4"));
     }
     render();
 
@@ -151,7 +151,7 @@ export function initKeyboard() {
                 g.to({ y: 0 });
             }
             st.mode = "abc";
-            st.shift = !t.value;
+            st.shift = !t.value && t.getAttribute("enterkeyhint") !== "search" && t.type !== "url"; // ô tìm kiếm không tự viết hoa
             render();
         },
         hide() {

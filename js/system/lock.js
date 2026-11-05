@@ -5,6 +5,8 @@ import { clamp, h, sys, sleep } from "../core/util.js";
 import { wallpaperCSS } from "../core/wallpapers.js";
 import { registerGlass, getGlass } from "../glass.js";
 import { sfx, buzz } from "../core/audio.js";
+const padlock = (open) => `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.200" stroke-linecap="round"><rect x="5" y="11" width="14" height="9.500" rx="2.500" fill="#fff"/><path d="${open ? "M8.500 11V7.500a3.500 3.500 0 0 1 6.800-1.200" : "M8 11V8a4 4 0 0 1 8 0v3"}"/></svg>`;
+import { t, LOC } from "../core/i18n.js";
 
 const LOCK_SVG = `<svg viewBox="0 0 24 30" width="22" height="27"><path class="shackle" d="M6.500 13V9.500a5.500 5.500 0 0 1 11 0V13" fill="none" stroke="#fff" stroke-width="2.600" stroke-linecap="round"/><rect x="3.500" y="12.500" width="17" height="14" rx="4" fill="#fff"/></svg>`;
 const FLASH = `<svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M8 2h8v4.500l-1.700 3.200V22H9.700V9.700L8 6.500z"/></svg>`;
@@ -21,7 +23,7 @@ export function initLock() {
             <div class="lnotifs"></div>
             <button class="lbtn flash" data-glass data-glass-surface="circle" data-glass-bezel="20" data-glass-thickness="40" data-glass-blur="4" data-press-scale="1.12">${FLASH}</button>
             <button class="lbtn cam" data-glass data-glass-surface="circle" data-glass-bezel="20" data-glass-thickness="40" data-glass-blur="4" data-press-scale="1.12">${CAM}</button>
-            <div class="lhint">Swipe up to open</div>
+            <div class="lhint">${t("Swipe up to open")}</div>
         </div>`;
     const lwp = el.querySelector(".lwp");
     const content = el.querySelector(".lock-c");
@@ -37,7 +39,7 @@ export function initLock() {
     const tick = () => {
         const d = new Date();
         timeEl.textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false }).replace(/^0/, "");
-        dateEl.textContent = d.toLocaleDateString("en", { weekday: "long", day: "numeric", month: "long" });
+        dateEl.textContent = d.toLocaleDateString(LOC, { weekday: "long", day: "numeric", month: "long" });
     };
     tick();
     setInterval(tick, 1000);
@@ -99,6 +101,8 @@ export function initLock() {
         get faceOk() { return st.faceOk; },
         el,
         lock() {
+            ctx.mod.island?.update("lock", { on: 1 });
+            ctx.screen.classList.add("is-locked");
             st.locked = true;
             g.snap({ u: 0 });
             ctx.mod.home.setUnlock(0);
@@ -115,6 +119,8 @@ export function initLock() {
             content.classList.add("wakein");
         },
         hide(openApp) {
+            ctx.mod.island?.update("lock", null);
+            ctx.screen.classList.remove("is-locked");
             st.locked = false;
             g.to({ u: 1 }, { params: { response: 0.48, damping: 0.9 } });
             if (!openApp) sfx.unlock();

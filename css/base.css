@@ -169,8 +169,11 @@ button {
 .hw.power { top: 270px; height: 104px; }
 .hw.camctl { top: 640px; height: 58px; opacity: 0.95; }
 
-.phone.bare { width: 440px; height: 956px; border-radius: 0; }
+.phone.bare { width: 440px; height: 956px; border-radius: 62px; background: #000; }
+body.bare, body.bare::before { background: #000; }
+body.restarting::after { content: ""; position: fixed; inset: 0; background: #000; z-index: 99; animation: rs 0.3s both; }
+@keyframes rs { from { opacity: 0; } }
 .phone.bare .frame,
 .phone.bare .bezel,
 .phone.bare .hw { display: none; }
-.phone.bare .screen { left: 0; top: 0; border-radius: 0; }
+.phone.bare .screen { left: 0; top: 0; border-radius: 62px; }

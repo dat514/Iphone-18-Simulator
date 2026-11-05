@@ -1,7 +1,8 @@
 import { ctx } from "../core/ctx.js";
 import { Group } from "../core/motion.js";
 import { ISLAND } from "../core/metrics.js";
-import { $ } from "../core/util.js";
+import { $, sys } from "../core/util.js";
+import { locale } from "../core/i18n.js";
 
 const SIZES = {
     idle: { w: ISLAND.w, h: ISLAND.h, r: ISLAND.h / 2 },
@@ -18,6 +19,11 @@ const ICO = {
     pause: `<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="5" width="4.2" height="14" rx="1.4"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.4"/></svg>`,
     next: `<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M5 6.2v11.6a.8.8 0 0 0 1.25.66l8.2-5.8a.8.8 0 0 0 0-1.32l-8.2-5.8A.8.8 0 0 0 5 6.2zM16.5 5.5h2.3v13h-2.3z"/></svg>`,
     prev: `<svg width="30" height="30" viewBox="0 0 24 24" fill="#fff"><path d="M19 6.2v11.6a.8.8 0 0 1-1.25.66l-8.2-5.8a.8.8 0 0 1 0-1.32l8.2-5.8A.8.8 0 0 1 19 6.2zM7.5 5.5H5.2v13h2.3z"/></svg>`,
+    faceid: `<svg class="fid" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#0a84ff" stroke-width="1.800" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1.500M15 10v1.500M12 10v4h-1M9.500 16.500c1.500 1 3.500 1 5 0"/><path class="sl" d="M5 12h14" stroke="#5ac8fa"/></svg>`,
+    faceok: `<svg class="fid ok" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#30d158" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M7.500 12.500l3 3 6-6.500"/></svg>`,
+    faceno: `<svg class="fid no" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#ff453a" stroke-width="1.800" stroke-linecap="round"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1.500M15 10v1.500M8.500 16.500c2-1.500 5-1.500 7 0"/></svg>`,
+    lockc: `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#fff" stroke-width="2.200" stroke-linecap="round"><rect x="5" y="11" width="14" height="9.500" rx="2.500" fill="#fff"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`,
+    torch: `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ffd60a"><path d="M8 2h8v4.500l-1.700 3.200V22H9.700V9.700L8 6.500z"/></svg>`,
     bell: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff453a" stroke-width="2.2" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0M3 3l18 18"/></svg>`,
     bellon: `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg>`,
 };
@@ -29,6 +35,8 @@ export function initIsland() {
         <div class="isl-v" data-v="compact-music"><span class="mini-art"></span>${WAVE}</div>
         <div class="isl-v" data-v="compact-timer">${ICO.timer}<b class="t"></b></div>
         <div class="isl-v" data-v="compact-call">${ICO.call}<b class="t g"></b></div>
+        <div class="isl-v" data-v="compact-lock">${ICO.lockc}</div>
+        <div class="isl-v" data-v="compact-flash">${ICO.torch}<i class="fl-dot"></i></div>
         <div class="isl-v" data-v="alert"><span class="ai"></span><span class="at"></span></div>
         <div class="isl-v x" data-v="x-music">
             <div class="xm-top"><span class="art"></span><span class="meta"><b class="xm-title"></b><em class="xm-artist"></em></span>${WAVE}</div>
@@ -51,7 +59,7 @@ export function initIsland() {
     let alertTimer = 0;
     let collapseTimer = 0;
     let alertShown = null;
-    const order = ["call", "timer", "music"];
+    const order = ["call", "timer", "music", "flash", "lock"];
     const top = () => order.find((k) => act[k]);
 
     const fmt = (s) => {
@@ -140,6 +148,16 @@ export function initIsland() {
             expanded = null;
             render();
         },
+        faceID(ok = true) {
+            const vi = locale === "vi";
+            return new Promise((res) => {
+                api.alert("<b>Face ID</b>", "faceid", 6000);
+                setTimeout(() => {
+                    api.alert(`<b>${ok ? (vi ? "Đã xác nhận" : "Done") : vi ? "Không nhận diện được" : "Face ID Failed"}</b>`, ok ? "faceok" : "faceno", 1600);
+                    setTimeout(() => res(ok), ok ? 900 : 1700);
+                }, 1300);
+            });
+        },
         alert(html, icon, ms = 2200) {
             alertShown = true;
             el.querySelector(".ai").innerHTML = ICO[icon] || "";
@@ -166,11 +184,14 @@ export function initIsland() {
             return;
         }
         if (expanded) api.collapse();
+        else if (top() === "flash") sys.set("flash", false, false);
         else if (top()) api.expand();
     });
     ctx.screen.addEventListener("pointerdown", (e) => {
         if (expanded && !e.target.closest("#island")) api.collapse();
     }, true);
     ctx.mod.ICO = ICO;
+    requestAnimationFrame(() => { if (ctx.mod.lock?.locked !== false) { api.update("lock", { on: 1 }); ctx.screen.classList.add("is-locked"); } });
+    sys.on("flash", (on) => api.update("flash", on ? { on: 1 } : null)); // GIẢ ĐỊNH: chưa đối chiếu video máy thật
     render();
 }

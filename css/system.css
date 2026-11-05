@@ -235,3 +235,102 @@
 .cc [data-glass], .cc [data-glass]::before { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 .cc .cbtn { background-color: rgba(255, 255, 255, 0.14); }
 .spot [data-glass] { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+
+.cc-pgs { position: absolute; inset: 0; transform-origin: 92% 70px; }
+.cc-pg { position: absolute; inset: 0; will-change: transform, opacity; }
+.cc-dots { position: absolute; right: 8px; top: 395px; display: flex; flex-direction: column; gap: 22px; z-index: 3; }
+.cc-dots button { width: 30px; height: 30px; display: grid; place-items: center; color: rgba(255, 255, 255, 0.45); }
+.cc-dots button.on { color: #fff; } .cc-dots svg { width: 22px; height: 22px; }
+.mpage { position: absolute; left: 20px; top: 70px; width: 360px; height: 560px; border-radius: 40px; display: flex !important; flex-direction: column; justify-content: flex-start; align-items: stretch; padding: 22px; gap: 16px; }
+.m-art.big { width: 100%; height: 316px; border-radius: 22px; flex: none; }
+.mpage .m-t b { font-size: 21px; } .mpage .m-t em { font-size: 16px; }
+.mpage .m-c button { width: 70px; height: 56px; }
+.hs { position: relative; height: 34px; border-radius: 17px; background: rgba(255, 255, 255, 0.22); overflow: hidden; touch-action: none; cursor: pointer; }
+.hs .vsf { position: absolute; left: 0; top: 0; bottom: 0; right: auto; width: 50%; height: auto; background: rgba(255, 255, 255, 0.95); }
+.cpl { position: absolute; left: 20px; top: 70px; width: 360px; display: flex; flex-direction: column; gap: 12px; }
+.cpill { display: flex !important; align-items: center; gap: 14px; padding: 0 20px; height: 82px; border-radius: 41px !important; text-align: left; justify-content: flex-start !important; }
+.cpill .cpi { width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 255, 255, 0.16); display: grid; place-items: center; flex: none; }
+.cpill.on .cpi { background: var(--on); }
+.cpill .cpt { display: flex; flex-direction: column; } .cpill b { font-size: 17px; font-weight: 600; } .cpill em { font-style: normal; font-size: 13px; opacity: 0.65; }
+.fl-dot { width: 6px; height: 6px; border-radius: 50%; background: #ffd60a; box-shadow: 0 0 8px #ffd60a; }
+
+/* AssistiveTouch */
+.atb { position: absolute; left: 0; top: 0; width: 60px; height: 60px; border-radius: 18px; z-index: 70; display: grid; place-items: center; color: #fff; --glass-fill: rgba(30, 30, 34, 0.72); transition: translate 0.5s var(--spring-bouncy), opacity 0.4s, scale 0.3s; touch-action: none; cursor: grab; }
+.atb svg { width: 34px; height: 34px; }
+.atb.idle { opacity: 0.4; } .atb.drag { transition: opacity 0.4s; scale: 1.1; cursor: grabbing; } .atb.away { opacity: 0; scale: 0.3; pointer-events: none; }
+.at-bg { position: absolute; inset: 0; z-index: 68; display: none; background: rgba(0, 0, 0, 0.12); } .at-bg.on { display: block; }
+.at-menu { position: absolute; width: 300px; height: 300px; border-radius: 44px; z-index: 69; --glass-fill: rgba(40, 40, 46, 0.62); color: #fff; transform: scale(0.2); opacity: 0; visibility: hidden; transition: transform 0.5s var(--spring-bouncy), opacity 0.25s, visibility 0s 0.5s; }
+.at-menu.open { transform: none; opacity: 1; visibility: visible; transition-delay: 0s; }
+.at-i { position: absolute; width: 112px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; line-height: 1.15; text-align: center; color: #fff; opacity: 0; transform: translate(-50%, -50%) scale(0.6); transition: transform 0.45s var(--spring-bouncy) calc(var(--i) * 20ms + 60ms), opacity 0.3s calc(var(--i) * 20ms + 60ms); }
+.at-menu.open .at-i { opacity: 1; transform: translate(-50%, -50%); }
+.at-i svg { width: 38px; height: 38px; }
+.shot-flash { position: absolute; inset: 0; background: #fff; z-index: 99; pointer-events: none; animation: shotf 0.45s ease-out both; }
+@keyframes shotf { from { opacity: 0.9; } to { opacity: 0; } }
+/* Siri */
+@property --a { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@keyframes siri-spin { to { --a: 360deg; } }
+.siri { position: absolute; inset: 0; z-index: 92; pointer-events: none; visibility: hidden; transition: visibility 0s 0.6s; }
+.siri.on { visibility: visible; transition-delay: 0s; }
+.siri-bg { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.3); opacity: 0; transition: opacity 0.4s; }
+.siri.on .siri-bg { opacity: 1; pointer-events: auto; }
+.siri-orb { position: absolute; top: 11px; left: 50%; width: 100px; height: 30px; margin-left: -50px; border-radius: 15px; opacity: 0; transform-origin: 50% 0; transition: transform 0.6s var(--spring-bouncy), opacity 0.25s; }
+.siri[data-style="27"].on .siri-orb { opacity: 1; transform: translateY(28px) scale(2.3); }
+.siri-orb::before { content: ""; position: absolute; inset: -6px; border-radius: inherit; background: conic-gradient(from var(--a), #3a7bff, #8b5cf6, #ff4fa3, #ff9f0a, #3a7bff); filter: blur(10px); animation: siri-spin 3s linear infinite; }
+.siri-orb::after { content: ""; position: absolute; inset: 2px; border-radius: inherit; background: radial-gradient(circle at 50% 40%, #14101f, #000); }
+.siri-orb i { position: absolute; inset: 5px; z-index: 1; border-radius: inherit; background: conic-gradient(from calc(var(--a) * -1), #3a7bffe6, #ff4fa3e6, #ff9f0acc, #8b5cf6e6, #3a7bffe6); filter: blur(7px); opacity: 0.85; mix-blend-mode: screen; animation: siri-spin 2.2s linear infinite; }
+.siri-edge { position: absolute; inset: 0; border-radius: 62px; padding: 7px; opacity: 0; transition: opacity 0.6s; background: conic-gradient(from var(--a), #bc82f3, #f5b9ea, #8d99ff, #aa6eee, #ff6778, #ffba71, #c686ff, #bc82f3); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); filter: blur(3px) saturate(1.3); animation: siri-spin 4s linear infinite; }
+.siri[data-style="26"].on .siri-edge { opacity: 1; }
+.siri[data-style="26"] .siri-orb { display: none; }
+.siri-card { position: absolute; left: 20px; right: 20px; top: 124px; padding: 18px 20px; border-radius: 30px; --glass-fill: rgba(30, 30, 36, 0.62); color: #fff; opacity: 0; transform: translateY(-20px) scale(0.96); transition: transform 0.5s var(--spring-bouncy), opacity 0.3s; pointer-events: auto; }
+.siri.on .siri-card { opacity: 1; transform: none; transition-delay: 0.15s; }
+.siri[data-style="26"] .siri-card { top: auto; bottom: 96px; }
+.siri-card .sq { font-size: 15px; opacity: 0.7; margin: 0 0 6px; } .siri-card .sa { font-size: 19px; font-weight: 600; margin: 0 0 12px; min-height: 22px; }
+.siri-in { width: 100%; height: 40px; border-radius: 20px; border: 0; outline: 0; padding: 0 16px; background: rgba(255, 255, 255, 0.14); color: #fff; font: inherit; font-size: 16px; }
+.siri-in::placeholder { color: rgba(255, 255, 255, 0.55); }
+
+/* Mở khoá: widget và icon hiện dần so le, từ lớn + mờ về đúng cỡ (iOS 26/27) */
+.hicon, .widget { --k: clamp(0, calc((var(--uu, 1) - var(--d, 0)) / 0.62), 1); opacity: calc(var(--ho) * var(--k)); scale: calc(1.22 - 0.22 * var(--k)); }
+.home.unlocking .hicon, .home.unlocking .widget { filter: blur(calc((1 - var(--k)) * 7px)); }
+.hicon.gone { opacity: 0; scale: 0.4; }
+.dots { opacity: clamp(0, calc((var(--uu, 1) - 0.3) / 0.6), 1); }
+.dock-glass { opacity: calc(var(--ho) * clamp(0, calc((var(--uu, 1) - 0.2) / 0.6), 1)); }
+
+/* Spotlight kiểu iOS 26: ô tìm kiếm nằm sát bàn phím, nội dung phía trên */
+.sp-bg { background: rgba(6, 6, 10, 0.62); }
+.sp-list { top: 72px; bottom: calc(var(--kb, 0px) + 86px); }
+.sp-hd { display: flex; justify-content: space-between; align-items: baseline; margin: 0 6px 10px; font-size: 17px; font-weight: 600; color: rgba(255, 255, 255, 0.62); }
+.sp-hd b { font-weight: 600; } .sp-hd span { color: #c9a7ff; }
+.sp-sug { display: flex; justify-content: space-around; padding: 16px 6px 12px; border-radius: 30px; background: rgba(255, 255, 255, 0.1); -webkit-backdrop-filter: blur(30px); backdrop-filter: blur(30px); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.22); }
+.sp-sug button { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 84px; font-size: 13px; font-weight: 600; color: #fff; }
+.sp-sec { margin: 26px 6px 6px; padding-bottom: 8px; font-size: 17px; font-weight: 600; color: rgba(255, 255, 255, 0.62); border-bottom: 0.5px solid rgba(255, 255, 255, 0.18); }
+.sp-web { display: flex; gap: 14px; align-items: center; padding: 10px 6px; border-bottom: 0.5px solid rgba(255, 255, 255, 0.14); }
+.sp-web .mini { width: 38px; height: 38px; flex: none; } .sp-web .mini .icon, .sp-row .mini .icon { transform-origin: 0 0; } .sp-web .mini .icon { transform: scale(0.613); }
+.sp-row .mini { width: 46px; height: 46px; flex: none; } .sp-row .mini .icon { transform: scale(0.742); }
+.sp-web div { display: flex; flex-direction: column; min-width: 0; } .sp-web b { font-size: 17px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .sp-web em { font-style: normal; font-size: 15px; color: rgba(255, 255, 255, 0.55); }
+.sp-field { position: absolute; left: 12px; right: 12px; top: auto; bottom: calc(var(--kb, 0px) + 14px); height: 56px; border-radius: 28px; padding: 0 20px; gap: 10px; --glass-fill: rgba(70, 70, 78, 0.5); }
+.sp-field input { font-size: 18px; font-weight: 600; }
+.kb .k { text-transform: none; } .kb .space { position: relative; } .kb .space .lg { position: absolute; right: 12px; bottom: 6px; font-style: normal; font-size: 10px; font-weight: 700; opacity: 0.5; }
+/* Thư viện ứng dụng: thư mục tối, gần đặc như máy thật; không hiện dấu trang */
+.lib-ic { background: rgba(26, 26, 30, 0.84); border-radius: 34px; -webkit-backdrop-filter: blur(26px); backdrop-filter: blur(26px); }
+.lib-s { --glass-fill: rgba(60, 60, 66, 0.5); font-weight: 700; }
+.lib-n { font-size: 15px; font-weight: 600; }
+.home.on-lib .dots { opacity: 0 !important; }
+
+/* Bàn phím tối (chế độ tối của iOS) */
+[data-theme="dark"] .kb-bg { --glass-fill: rgba(28, 28, 32, 0.78) !important; }
+[data-theme="dark"] .k { background: #4d4d52; color: #fff; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.55); }
+[data-theme="dark"] .k.fn { background: #333337; }
+
+.kb { z-index: 66; } /* nằm trên Spotlight (60) để không bị làm tối/mờ */
+
+/* Trình chuyển app: nhãn nhỏ căn trái phía trên thẻ, thẻ bo lớn (ảnh iPhone thật) */
+.sw-label { width: 260px; gap: 10px; font-size: 17px; font-weight: 700; }
+.sw-label .mini { width: 30px; height: 30px; flex: none; } .sw-label .mini .icon { transform: scale(0.484); transform-origin: 0 0; }
+/* Màn hình khoá: ổ khoá nằm trong Dynamic Island, hai nút tối như máy thật, không có dòng chữ hướng dẫn */
+.lbtn { --glass-fill: rgba(18, 18, 20, 0.6); width: 64px; height: 64px; bottom: 70px; }
+.lbtn.on { --glass-fill: rgba(255, 255, 255, 0.95); }
+.lhint, .lk, .lock-lk { display: none !important; }
+.padlock { opacity: 0 !important; }
+
+.is-locked #sb { opacity: 0; transition: opacity 0.3s; }
+.lbtn.flash:not(.on) { --glass-fill: rgba(18, 18, 20, 0.72) !important; }

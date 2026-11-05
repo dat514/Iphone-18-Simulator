@@ -5,6 +5,7 @@ import { APPS, iconHTML } from "../core/apps.js";
 import { clamp, h, rubber, store, sys, Velocity } from "../core/util.js";
 import { wallpaperCSS } from "../core/wallpapers.js";
 import { registerGlass } from "../glass.js";
+import { t, LOC } from "../core/i18n.js";
 
 const DEFAULT = {
     pages: [
@@ -28,7 +29,7 @@ export function initHome() {
     const dots = h("div.dots");
     const dockGlass = h("div.dock-glass", { "data-glass": "", "data-glass-static": "", "data-glass-bezel": "34", "data-glass-thickness": "60", "data-glass-refraction": "1.1", "data-glass-blur": "6" });
     const dockRow = h("div.dock-row");
-    const doneBtn = h("button.done", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "14", on: { click: () => setEdit(false) } }, "Done");
+    const doneBtn = h("button.done", { "data-glass": "", "data-glass-lite": "", "data-glass-bezel": "14", on: { click: () => setEdit(false) } }, t("Done"));
     pages.append(track);
     home.append(wp, pages, dots, dockGlass, dockRow, doneBtn);
     registerGlass(dockGlass);
@@ -43,11 +44,25 @@ export function initHome() {
 
     function makeIcon(id, onDock) {
         const app = APPS[id];
-        const el = h("div.hicon", { "data-app": id, html: `${iconHTML(id, app.name)}<span class="lbl">${app.name}</span>${app.placeholder ? '<button class="del">−</button>' : ""}` });
+        const el = h("div.hicon", { "data-app": id, html: `${iconHTML(id, app.name)}<span class="lbl">${app.name}</span>${(app.placeholder || app.installable) ? '<button class="del">−</button>' : ""}` });
         el.style.setProperty("--j", (Math.random() * 2).toFixed(2));
         const g = new Group({ x: 0, y: 0 }, { response: 0.38, damping: 0.8 }, (v) => (el.style.transform = `translate3d(${v.x}px,${v.y}px,0)`));
         icons[id] = { el, g, id, dock: !!onDock };
         return icons[id];
+    }
+
+    const LIB = [["Suggestions", ["settings", "photos", "camera", "clock"], true], ["Recently Added", ["appstore", "files", "wallet", "health", "tv", "stocks", "translate"]], ["Social", ["messages", "phone", "mail", "safari"]], ["Entertainment", ["music", "podcasts", "tv", "photos", "camera"]], ["Utilities", ["calculator", "compass", "notes", "weather", "clock", "maps"]], ["Productivity & Finance", ["calendar", "reminders", "notes", "mail", "wallet", "stocks", "files"]]];
+    function makeLibrary() {
+        const page = h("div.page.lib", { style: { left: layout.pages.length * W + "px" } });
+        const tile = (id, cls) => h("div.lib-i." + cls, { "data-lib": id, html: iconHTML(id, APPS[id].name) });
+        const folder = ([name, ids, four]) => {
+            const big = ids.slice(0, four ? 4 : 3);
+            const small = four ? [] : ids.slice(3, 7);
+            return h("div.lib-f", [h("div.lib-ic", [...big.map((id) => tile(id, "b")), small.length ? h("div.lib-sm", small.map((id) => tile(id, "s"))) : null]), h("span.lib-n", t(name))]);
+        };
+        page.append(h("div.lib-s", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "24" }, t("App Library")), h("div.lib-g", LIB.map(folder)));
+        requestAnimationFrame(() => registerGlass(page.querySelector(".lib-s")));
+        return page;
     }
 
     function build() {
@@ -67,6 +82,8 @@ export function initHome() {
             });
             dots.append(h("i"));
         });
+        track.append(makeLibrary());
+        dots.append(h("i"));
         layout.dock.forEach((id) => {
             const ic = makeIcon(id, true);
             dockRow.append(ic.el);
@@ -79,12 +96,14 @@ export function initHome() {
         layout.dock.forEach((id, i) => {
             const gap = (DOCK.w - 4 * ICON) / 5;
             const t = { x: DOCK.x + gap * (i + 1) + ICON * i - (84 - ICON) / 2, y: DOCK.y + (DOCK.h - ICON) / 2 - 2 };
+            icons[id].el.style.setProperty("--d", (0.3 + 0.03 * i).toFixed(3));
             icons[id].g[snap ? "snap" : "to"](t);
         });
     }
     function place(id, slot, snap) {
         const s = slotXY(slot);
         const t = { x: s.x - (84 - ICON) / 2, y: s.y };
+        icons[id].el.style.setProperty("--d", (0.04 * Math.floor(slot / 4) + 0.012 * (slot % 4)).toFixed(3)); // icon xuất hiện lần lượt từ trên xuống
         icons[id].g[snap ? "snap" : "to"](t);
     }
 
@@ -93,19 +112,20 @@ export function initHome() {
         const w = COL_PITCH * 2 - 8;
         const ht = ROW_PITCH * 2 - 40;
         const cal = h("div.widget.cal", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "26", style: { left: GRID_X + 4 + "px", top: GRID_Y + "px", width: w + "px", height: ht + "px" } });
-        cal.innerHTML = `<span class="wd">${d.toLocaleDateString("en", { weekday: "long" })}</span><b class="wn">${d.getDate()}</b><em>${d.toLocaleDateString("en", { month: "long" })}</em><p>No events today</p>`;
+        cal.innerHTML = `<span class="wd">${d.toLocaleDateString(LOC, { weekday: "long" })}</span><b class="wn">${d.getDate()}</b><em>${d.toLocaleDateString(LOC, { month: "long" })}</em><p>${t("No events today")}</p>`;
         const hr = d.getHours();
         const wx = h("div.widget.wx", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "26", style: { left: GRID_X + 4 + COL_PITCH * 2 + "px", top: GRID_Y + "px", width: w + "px", height: ht + "px" } });
-        wx.innerHTML = `<span class="wl">Ho Chi Minh City</span><b class="wt">${hr > 17 || hr < 6 ? 27 : 31}°</b><svg viewBox="0 0 24 24" width="30" height="30"><circle cx="9" cy="10" r="4.2" fill="#ffd60a"/><path d="M9 2.500v1.500M2.500 10H4M4.500 5.500l1 1M13.500 5.500l-1 1" stroke="#ffd60a" stroke-width="1.400" stroke-linecap="round"/><path fill="#fff" d="M10 20a4 4 0 0 1 .8-7.900A5.500 5.500 0 0 1 21 14a3.500 3.500 0 0 1-.5 6z"/></svg><p>Mostly Cloudy</p><em>H:33°  L:26°</em>`;
+        wx.innerHTML = `<span class="wl">${t("Ho Chi Minh City")}</span><b class="wt">${hr > 17 || hr < 6 ? 27 : 31}°</b><svg viewBox="0 0 24 24" width="30" height="30"><circle cx="9" cy="10" r="4.2" fill="#ffd60a"/><path d="M9 2.500v1.500M2.500 10H4M4.500 5.500l1 1M13.500 5.500l-1 1" stroke="#ffd60a" stroke-width="1.400" stroke-linecap="round"/><path fill="#fff" d="M10 20a4 4 0 0 1 .8-7.900A5.500 5.500 0 0 1 21 14a3.500 3.500 0 0 1-.5 6z"/></svg><p>${t("Mostly Cloudy")}</p><em>H:33°  L:26°</em>`;
         requestAnimationFrame(() => [cal, wx].forEach(registerGlass));
         return [cal, wx];
     }
 
     /* ---------- paging ---------- */
     const pg = new Group({ x: 0 }, { response: 0.5, damping: 0.88 }, (v) => (track.style.transform = `translate3d(${-v.x}px,0,0)`));
-    const maxPage = () => layout.pages.length - 1;
+    const maxPage = () => layout.pages.length; // trang cuối là Thư viện ứng dụng
     function setDot(p) {
         state.page = p;
+        home.classList.toggle("on-lib", p === layout.pages.length);
         dots.querySelectorAll("i").forEach((d, i) => d.classList.toggle("on", i === p));
     }
     function goPage(p, vx) {
@@ -126,14 +146,14 @@ export function initHome() {
         const p = ctx.pt(e);
         if (p.y < 40 || p.y > H - 34) return;
         const icon = e.target.closest(".hicon");
-        down = { x: p.x, y: p.y, icon, axis: null, x0: pg.values.x, id: e.pointerId, del: !!e.target.closest(".del") };
+        down = { x: p.x, y: p.y, icon, axis: null, x0: pg.values.x, id: e.pointerId, del: !!e.target.closest(".del"), lib: e.target.closest("[data-lib]") };
         vel.reset();
         vel.push(p.x, p.y);
         if (icon && !down.del) {
             icon.classList.add("pressed");
             clearTimeout(lp);
             if (!state.editing) lp = setTimeout(() => down && !down.axis && openMenu(icon), 430);
-        } else if (!icon && !state.editing) {
+        } else if (!icon && !state.editing && !down.lib && state.page < layout.pages.length) {
             clearTimeout(lp);
             lp = setTimeout(() => down && !down.axis && setEdit(true), 650);
         }
@@ -178,6 +198,7 @@ export function initHome() {
         if (drag) return endDrag();
         if (!d.axis) {
             if (menuOpen) return;
+            if (d.lib && !state.editing) return ctx.mod.wm.open(d.lib.dataset.lib, ctx.rect(d.lib));
             if (d.del) return removeIcon(d.icon.dataset.app);
             if (d.icon && !state.editing) ctx.mod.wm.open(d.icon.dataset.app);
             else if (!d.icon && state.editing) return;
@@ -244,6 +265,7 @@ export function initHome() {
             delete icons[id];
             layout.pages.forEach((ids, p) => ids.forEach((x, i) => place(x, OFFSET[p] + i)));
             store.set("layout", layout);
+            if (APPS[id].installable) { store.set("installed", store.get("installed", []).filter((x) => x !== id)); APPS[id].cloud = true; ctx.mod.appstore?.refresh(); }
         }, 220);
     }
 
@@ -255,8 +277,8 @@ export function initHome() {
         const r = ctx.rect(iconEl.querySelector(".icon"));
         const below = r.y < H / 2;
         const menu = h("div.cmenu", { "data-glass": "", "data-glass-lite": "", "data-glass-static": "", "data-glass-bezel": "20", style: { left: clamp(r.x - 50, 14, W - 14 - 240) + "px", [below ? "top" : "bottom"]: (below ? r.y + r.h + 22 : H - r.y + 14) + "px", transformOrigin: `${r.x + r.w / 2}px ${below ? "0%" : "100%"}` } },
-            h("button", { on: { click: () => { closeMenu(); ctx.mod.wm.open(id); } } }, `Open ${APPS[id].name}`),
-            h("button", { on: { click: () => setEdit(true) } }, "Edit Home Screen"),
+            h("button", { on: { click: () => { closeMenu(); ctx.mod.wm.open(id); } } }, `${t("Open")} ${APPS[id].name}`),
+            h("button", { on: { click: () => setEdit(true) } }, t("Edit Home Screen")),
         );
         const dim = h("div.cdim", { on: { pointerdown: closeMenu } });
         const clone = h("div.mclone", { html: iconEl.querySelector(".icon").outerHTML, style: { left: r.x + "px", top: r.y + "px" } });
@@ -278,8 +300,10 @@ export function initHome() {
 
     /* ---------- public ---------- */
     const factors = () => {
-        const hs = 1 + 0.11 * state.appP + 0.1 * (1 - state.unlockU);
-        const ho = clamp(1 - state.appP * 1.35, 0, 1) * clamp(state.unlockU * 1.2, 0, 1);
+        const hs = 1 + 0.11 * state.appP;
+        const ho = clamp(1 - state.appP * 1.35, 0, 1);
+        home.style.setProperty("--uu", state.unlockU.toFixed(4)); // tiến độ mở khoá: từng icon tự tính độ trễ theo --d
+        home.classList.toggle("unlocking", state.unlockU < 1);
         home.style.setProperty("--hs", hs.toFixed(4));
         home.style.setProperty("--ho", ho.toFixed(3));
     };
@@ -304,6 +328,18 @@ export function initHome() {
             const px = p >= 0 ? p * W - pg.values.x : 0;
             return { x: v.x + (84 - ICON) / 2 + px, y: v.y, w: ICON, h: ICON };
         },
+        addApp(id, o = {}) {
+            if (icons[id]) return;
+            let p = layout.pages.findIndex((ids, i) => OFFSET[i] + ids.length < 24);
+            if (p < 0) p = layout.pages.length - 1;
+            layout.pages[p].push(id);
+            const ic = makeIcon(id); ic.page = p; pageEls[p].append(ic.el);
+            place(id, OFFSET[p] + layout.pages[p].length - 1, true);
+            store.set("layout", layout);
+            if (o.installing) { ic.el.classList.add("installing"); ic.el.style.setProperty("--p", "0"); }
+        },
+        setInstall(id, p, label) { const el = icons[id]?.el; if (!el) return; el.style.setProperty("--p", (p * 100).toFixed(1)); el.querySelector(".lbl").textContent = label; },
+        finishInstall(id) { const el = icons[id]?.el; if (!el) return; el.classList.remove("installing"); el.classList.add("pop"); el.querySelector(".lbl").textContent = APPS[id].name; setTimeout(() => el.classList.remove("pop"), 800); },
         get editing() { return state.editing; },
         setEdit,
         firstPage() { goPage(0); },
@@ -311,4 +347,5 @@ export function initHome() {
     });
     build();
     factors();
+    store.get("installed", []).forEach((id) => APPS[id] && api.addApp(id));
 }

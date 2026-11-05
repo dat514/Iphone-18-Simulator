@@ -37,7 +37,8 @@ export function buildDevice() {
     const fit = () => {
         const vw = innerWidth;
         const vh = innerHeight;
-        const bare = vw < 520;
+        const bare = vw < 520 || (matchMedia("(pointer: coarse)").matches && Math.max(vw, vh) < 1100);
+        document.body.classList.toggle("bare", bare);
         ctx.phone.classList.toggle("bare", bare);
         const s = bare ? Math.min(vw / W, vh / H) : Math.min((vw - 24) / 471, (vh - 24) / 987, 1.2);
         ctx.phone.style.setProperty("--s", s.toFixed(4));

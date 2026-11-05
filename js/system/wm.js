@@ -77,6 +77,7 @@ export const wm = {
     syncTone,
 
     open(id, from) {
+        if (APPS[id]?.cloud) return; // app chưa cài (đang ở trạng thái đám mây)
         if (mode === "switcher") return;
         const app = APPS[id];
         if (!app) return;
@@ -135,6 +136,7 @@ export const wm = {
             velocity,
             done: () => {
                 w.el.style.display = "none";
+                wins.forEach((x) => { if (x !== w) x.el.style.display = "none"; }); // dọn cửa sổ còn sót nếu chuyển cảnh trước bị ngắt (lỗi C4)
                 w.el.classList.remove("moving");
                 ctx.mod.home.hideIcon(id, false);
                 setFactors(0);
@@ -319,11 +321,11 @@ export const wm = {
 };
 
 /* ---------- switcher internals ---------- */
-const CS = 0.56;
+const CS = 0.70; // thẻ cao ~70% màn hình như iOS thật
 const CW = W * CS;
 const CH = H * CS;
-const GAP = 30;
-const cardState = (i, scroll) => ({ cx: W / 2 + i * (CW + GAP) + scroll, cy: H / 2 - 12, mw: CW, mh: CH, s: CS, r: 38 });
+const GAP = -(W * 0.7 * 0.26); // thẻ chồng lên nhau (khoảng cách ≈ 0,74 bề rộng thẻ)
+const cardState = (i, scroll) => ({ cx: W / 2 + i * (CW + GAP) + scroll, cy: H / 2 - 2, mw: CW, mh: CH, s: CS, r: 46 });
 const sw = { ids: [], scroll: 0, el: null, bg: null, labels: [], active: null };
 
 function buildLabels() {
@@ -342,7 +344,7 @@ function syncLabels() {
         const v = w.g.values;
         const l = sw.labels[i];
         if (!l) return;
-        l.style.transform = `translate3d(${v.cx - 90}px, ${v.cy - v.mh / 2 - 34}px, 0)`;
+        l.style.transform = `translate3d(${v.cx - v.mw / 2 + 4}px, ${v.cy - v.mh / 2 - 42}px, 0)`;
         l.style.opacity = mode === "switcher" ? clamp(1 - Math.abs(v.cx - W / 2) / 360 + 0.35, 0, 1).toFixed(2) : 0;
     });
 }
